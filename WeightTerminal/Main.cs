@@ -61,7 +61,17 @@ namespace WeightTerminal
                 {
                     serialPort.PortName = cboxPorts.Text;
 
-                    serialPort.NewLine = "\x0D";
+                    if (rbtnNewton42.Checked)
+                    {
+                        serialPort.NewLine = "\x0D";
+                    }
+                    else
+                    {
+                        if (rbtnMidlVda12.Checked)
+                        {
+                            serialPort.NewLine = "\x0A";
+                        }
+                    }
 
                     serialPort.Open();
 
@@ -157,7 +167,8 @@ namespace WeightTerminal
                 if (rbtnMidlVda12.Checked)
                 {
                     // Мидл ВДА/12Я
-                    // ww000.000kg
+                    // WW0000.00kg..
+                    // 57 57 30 30 30 30 2E 30 30 6B 67 0D 0A
 
                     startIndex = 2;
                     length = 7;
