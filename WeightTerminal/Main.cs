@@ -66,6 +66,7 @@ namespace WeightTerminal
                     serialPort.Open();
 
                     serialPort.DiscardInBuffer();
+                    serialPort.DiscardOutBuffer();
 
                     ListBoxAdd(serialPort.PortName + " opened");
 
@@ -73,7 +74,13 @@ namespace WeightTerminal
                 }
                 else
                 {
-                    serialPort.Close();
+                    if (serialPort.IsOpen)
+                    {
+                        serialPort.DiscardInBuffer();
+                        serialPort.DiscardOutBuffer();
+
+                        serialPort.Close();
+                    }
 
                     ListBoxAdd(serialPort.PortName + " closed");
 
@@ -152,7 +159,7 @@ namespace WeightTerminal
                     // Мидл ВДА/12Я
                     // ww000.000kg
 
-                    startIndex = 3;
+                    startIndex = 2;
                     length = 7;
                 }
             }
