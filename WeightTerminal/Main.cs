@@ -1,10 +1,7 @@
-﻿using P3tr0viCh.Utils;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Globalization;
 using System.IO.Ports;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WeightTerminal
 {
@@ -17,7 +14,7 @@ namespace WeightTerminal
 
         private void ListBoxAdd(string s)
         {
-            listBox.SelectedIndex = listBox.Items.Add(s);
+            listBox.SelectedIndex = listBox.Items.Add(string.Format("{0}: {1}", listBox.Items.Count, s));
         }
 
         private void GetComPorts()
@@ -175,12 +172,12 @@ namespace WeightTerminal
                 }
             }
 
-            var weight = s.Substring(startIndex, length);
-
-            ListBoxAdd(weight);
-
             try
             {
+                var weight = s.Substring(startIndex, length);
+
+                ListBoxAdd(weight);
+
                 var w = DoubleParse(weight);
 
                 lblWeight.Text = w.ToString("0.00");
