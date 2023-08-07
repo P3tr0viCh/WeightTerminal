@@ -68,6 +68,13 @@ namespace WeightTerminal
                         {
                             serialPort.NewLine = "\x0A";
                         }
+                        else
+                        {
+                            if (rbtnMicrosimM0601.Checked)
+                            {
+                                serialPort.NewLine = "\x0A";
+                            }
+                        }
                     }
 
                     serialPort.Open();
@@ -169,6 +176,18 @@ namespace WeightTerminal
 
                     startIndex = 2;
                     length = 7;
+                }
+                else
+                {
+                    if (rbtnMicrosimM0601.Checked)
+                    {
+                        // Микросим М0601
+                        // Б 172.60 B 
+                        // 81 20 20 31 37 32 2E 36 30 20 42 20 20 0D 0A
+
+                        startIndex = 2;
+                        length = 7;
+                    }
                 }
             }
 
