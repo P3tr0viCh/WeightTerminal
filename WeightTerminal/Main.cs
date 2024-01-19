@@ -1,15 +1,98 @@
-﻿using System;
+﻿using P3tr0viCh.Utils;
+using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO.Ports;
 using System.Windows.Forms;
+using WA;
+using WeightTerminal.Properties;
+using static P3tr0viCh.Utils.ScaleTerminal;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WeightTerminal
 {
     public partial class Main : Form
     {
+        private enum BtnImage
+        {
+            SettingsNormal = 0,
+            SettingsHover = 1,
+        }
+
+        private readonly ScaleTerminal ScaleTerminal = new ScaleTerminal();
+
         public Main()
         {
             InitializeComponent();
+
+            Utils.Log.WriteProgramStart();
+
+            AppSettings.Directory = Files.ExecutableDirectory();
+
+            Debug.WriteLine("Settings: " + AppSettings.FilePath);
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            AppOneInstance.CheckAndShowApplication(m, this);
+
+            base.WndProc(ref m);
+        }
+
+        private void Main_Load(object sender, EventArgs e)
+        {
+            Weight = 0;
+
+            SetBtnImage(btnSettings, BtnImage.SettingsNormal);
+
+            ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
+
+            AppSettingsLoad();
+
+            SettingsChanged();
+        }
+
+        private int weight = 0;
+        public int Weight
+        {
+            get
+            {
+                return weight;
+            }
+            set
+            {
+                weight = value;
+
+                lblWeight.Text = weight.ToString();
+            }
+        }
+
+        private void ScaleTerminal_WeightReceived(object sender, WeightEventArgs e)
+        {
+            this.InvokeIfNeeded(() => Weight = e.Weight);
+        }
+
+        private void Main_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            SetComPortState(false);
+
+            AppSettingsSave();
+
+            Utils.Log.WriteProgramStop();
+        }
+
+        public void AppSettingsLoad()
+        {
+            if (AppSettings.Default.Load()) return;
+
+            Utils.WriteLogError(AppSettings.LastError);
+        }
+
+        public void AppSettingsSave()
+        {
+            if (AppSettings.Default.Save()) return;
+
+            Utils.WriteLogError(AppSettings.LastError);
         }
 
         private void ListBoxAdd(string s)
@@ -17,37 +100,27 @@ namespace WeightTerminal
             listBox.SelectedIndex = listBox.Items.Add(string.Format("{0}: {1}", listBox.Items.Count, s));
         }
 
-        private void GetComPorts()
+        private bool CheckComPortsExists()
         {
-            cboxPorts.Items.Clear();
-
-            btnConnect.Enabled = false;
-
             var ports = SerialPort.GetPortNames();
-
-            ListBoxAdd("COM ports count: " + ports.Length);
 
             if (ports.Length != 0)
             {
-                cboxPorts.Items.AddRange(ports);
+                ListBoxAdd("COM ports count: " + ports.Length);
 
-                serialPort.DataReceived += SerialPortDataReceived;
-
-                btnConnect.Enabled = true;
+                return true;
             }
             else
             {
-                cboxPorts.Items.Add("COM PORT not found");
-            }
+                ListBoxAdd("COM PORT not found");
 
-            cboxPorts.SelectedIndex = 0;
+                return false;
+            }
         }
 
-        private void Main_Load(object sender, EventArgs e)
+        private void SetBtnImage(PictureBox button, BtnImage image)
         {
-            GetComPorts();
-
-            receivedEvent = new LineReceivedEvent(LineReceived);
+            button.Image = imageList.Images[(int)image];
         }
 
         private void SetComPortState(bool open)
@@ -56,47 +129,17 @@ namespace WeightTerminal
             {
                 if (open)
                 {
-                    serialPort.PortName = cboxPorts.Text;
+                    ScaleTerminal.Open();
 
-                    if (rbtnNewton42.Checked)
-                    {
-                        serialPort.NewLine = "\x0D";
-                    }
-                    else
-                    {
-                        if (rbtnMidlVda12.Checked)
-                        {
-                            serialPort.NewLine = "\x0A";
-                        }
-                        else
-                        {
-                            if (rbtnMicrosimM0601.Checked)
-                            {
-                                serialPort.NewLine = "\x0A";
-                            }
-                        }
-                    }
-
-                    serialPort.Open();
-
-                    serialPort.DiscardInBuffer();
-                    serialPort.DiscardOutBuffer();
-
-                    ListBoxAdd(serialPort.PortName + " opened");
+                    ListBoxAdd(ScaleTerminal.PortName + " opened");
 
                     btnConnect.Text = "Close";
                 }
                 else
                 {
-                    if (serialPort.IsOpen)
-                    {
-                        serialPort.DiscardInBuffer();
-                        serialPort.DiscardOutBuffer();
+                    ScaleTerminal.Close();
 
-                        serialPort.Close();
-                    }
-
-                    ListBoxAdd(serialPort.PortName + " closed");
+                    ListBoxAdd(ScaleTerminal.PortName + " closed");
 
                     btnConnect.Text = "Open";
                 }
@@ -109,12 +152,7 @@ namespace WeightTerminal
 
         private void BtnConnect_Click(object sender, EventArgs e)
         {
-            SetComPortState(!serialPort.IsOpen);
-        }
-
-        private void Main_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            SetComPortState(false);
+            SetComPortState(!ScaleTerminal.IsOpen);
         }
 
         private void BtnClose_Click(object sender, EventArgs e)
@@ -122,91 +160,68 @@ namespace WeightTerminal
             Close();
         }
 
-        private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void BtnSettings_MouseEnter(object sender, EventArgs e)
         {
-            try
-            {
-                var line = serialPort.ReadLine();
-
-                BeginInvoke(receivedEvent, line);
-            }
-            catch (Exception)
-            {
-            }
+            SetBtnImage(btnSettings, BtnImage.SettingsHover);
         }
 
-        private delegate void LineReceivedEvent(string line);
-        private LineReceivedEvent receivedEvent;
-
-        private void LineReceived(string line)
+        private void BtnSettings_MouseLeave(object sender, EventArgs e)
         {
-            ListBoxAdd(line);
-
-            SetWeight(line);
+            SetBtnImage(btnSettings, BtnImage.SettingsNormal);
         }
 
-        public static double DoubleParse(string str, double def = 0.0)
+        private void SettingsChanged()
         {
-            return double.TryParse(str, NumberStyles.Float | NumberStyles.AllowThousands,
-                CultureInfo.InvariantCulture, out double result) ?
-                result : def;
-        }
+            var prevStateOpen = ScaleTerminal.IsOpen;
 
-        private void SetWeight(string s)
-        {
-            var startIndex = 0;
-            var length = 0;
+            SetComPortState(false);
 
-            if (rbtnNewton42.Checked)
+            if (CheckComPortsExists())
             {
-                // Ньютон-42
-                //0    1    2      9    10   11   12
-                //0x02 0x20 weight 0x20 0x47 0x20 0x0D
-
-                startIndex = 2;
-                length = 7;
+                btnConnect.Enabled = true;
             }
             else
             {
-                if (rbtnMidlVda12.Checked)
-                {
-                    // Мидл ВДА/12Я
-                    // WW0000.00kg..
-                    // 57 57 30 30 30 30 2E 30 30 6B 67 0D 0A
+                btnConnect.Enabled = false;
 
-                    startIndex = 2;
-                    length = 7;
-                }
-                else
-                {
-                    if (rbtnMicrosimM0601.Checked)
-                    {
-                        // Микросим М0601
-                        // Б 172.60 B 
-                        // 81 20 20 31 37 32 2E 36 30 20 42 20 20 0D 0A
-
-                        startIndex = 2;
-                        length = 7;
-                    }
-                }
+                return;
             }
 
-            try
+            if (string.IsNullOrEmpty(AppSettings.Default.ComPortName))
             {
-                var weight = s.Substring(startIndex, length);
+                ListBoxAdd("error: comportname empty. check settings");
 
-                ListBoxAdd(weight);
-
-                var w = DoubleParse(weight);
-
-                lblWeight.Text = w.ToString("0.00");
+                return;
             }
-            catch (Exception e)
+
+            if (AppSettings.Default.TerminalType == Enums.TerminalType.None)
             {
-                lblWeight.Text = "0.00";
+                ListBoxAdd("error: terminaltype=none. check settings");
 
-                ListBoxAdd("error: " + e.Message);
+                return;
             }
+
+            ScaleTerminal.SerialPort.PortName = AppSettings.Default.ComPortName;
+
+            ScaleTerminal.Type = (TerminalType)AppSettings.Default.TerminalType;
+
+            if (prevStateOpen)
+            {
+                SetComPortState(true);
+            }
+        }
+
+        private void ShowSettings()
+        {
+            if (FrmSettings.ShowDlg(this))
+            {
+                SettingsChanged();
+            }
+        }
+
+        private void BtnSettings_Click(object sender, EventArgs e)
+        {
+            ShowSettings();
         }
     }
 }

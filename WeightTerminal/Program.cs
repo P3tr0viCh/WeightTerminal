@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using P3tr0viCh.Utils;
+using System;
 using System.Windows.Forms;
 
 namespace WeightTerminal
@@ -14,9 +12,23 @@ namespace WeightTerminal
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Main());
+            if (AppOneInstance.IsFirstInstance())
+            {
+                try
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new Main());
+                }
+                finally
+                {
+                    AppOneInstance.Exit();
+                }
+            }
+            else
+            {
+                AppOneInstance.ShowExistsInstance();
+            }
         }
     }
 }
