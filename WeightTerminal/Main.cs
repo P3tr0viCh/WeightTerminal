@@ -1,13 +1,11 @@
 ﻿using P3tr0viCh.Utils;
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO.Ports;
 using System.Windows.Forms;
 using WA;
 using WeightTerminal.Properties;
 using static P3tr0viCh.Utils.ScaleTerminal;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WeightTerminal
 {
@@ -17,9 +15,18 @@ namespace WeightTerminal
         {
             SettingsNormal = 0,
             SettingsHover = 1,
+            StateOnNormal = 2,
+            StateOnHover = 3,
+            StateOffNormal = 4,
+            StateOffHover = 5,
+            AboutNormal = 6,
+            AboutHover = 7,
         }
 
         private readonly ScaleTerminal ScaleTerminal = new ScaleTerminal();
+
+        private BtnImage StateNormal = BtnImage.StateOffNormal;
+        private BtnImage StateHover = BtnImage.StateOffHover;
 
         public Main()
         {
@@ -41,15 +48,23 @@ namespace WeightTerminal
 
         private void Main_Load(object sender, EventArgs e)
         {
-            Weight = 0;
-
+            SetBtnImage(btnState, StateNormal);
             SetBtnImage(btnSettings, BtnImage.SettingsNormal);
+            SetBtnImage(btnAbout, BtnImage.AboutNormal);
 
+            ScaleTerminal.LineReceived += ScaleTerminal_LineReceived;
             ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
 
             AppSettingsLoad();
 
             SettingsChanged();
+
+            Weight = 0;
+        }
+
+        private void ScaleTerminal_LineReceived(object sender, LineEventArgs e)
+        {
+            Utils.WriteDebug($">{e.Line}<");
         }
 
         private int weight = 0;
@@ -63,7 +78,17 @@ namespace WeightTerminal
             {
                 weight = value;
 
-                lblWeight.Text = weight.ToString();
+                switch (AppSettings.Default.OutputMassUnit)
+                {
+                    case Enums.MassUnit.tn:
+                        lblWeight.Text = (weight / 1000).ToString("0.000");
+
+                        break;
+                    default:
+                        lblWeight.Text = weight.ToString();
+
+                        break;
+                }
             }
         }
 
@@ -74,7 +99,7 @@ namespace WeightTerminal
 
         private void Main_FormClosed(object sender, FormClosedEventArgs e)
         {
-            SetComPortState(false);
+            TerminalState = false;
 
             AppSettingsSave();
 
@@ -95,24 +120,19 @@ namespace WeightTerminal
             Utils.WriteLogError(AppSettings.LastError);
         }
 
-        private void ListBoxAdd(string s)
-        {
-            listBox.SelectedIndex = listBox.Items.Add(string.Format("{0}: {1}", listBox.Items.Count, s));
-        }
-
         private bool CheckComPortsExists()
         {
             var ports = SerialPort.GetPortNames();
 
             if (ports.Length != 0)
             {
-                ListBoxAdd("COM ports count: " + ports.Length);
+                Utils.WriteLog($"COM ports count: {ports.Length}");
 
                 return true;
             }
             else
             {
-                ListBoxAdd("COM PORT not found");
+                Utils.WriteLog("COM PORT not found");
 
                 return false;
             }
@@ -123,41 +143,86 @@ namespace WeightTerminal
             button.Image = imageList.Images[(int)image];
         }
 
-        private void SetComPortState(bool open)
+        private bool MouseIsOverControl(Control control) =>
+            control.ClientRectangle.Contains(
+                control.PointToClient(Cursor.Position));
+
+        public bool TerminalState
         {
-            try
+            get
             {
-                if (open)
+                return ScaleTerminal.IsOpen;
+            }
+            set
+            {
+                try
                 {
-                    ScaleTerminal.Open();
+                    if (value)
+                    {
+                        if (!ScaleTerminal.IsOpen)
+                        {
+                            ScaleTerminal.Open();
 
-                    ListBoxAdd(ScaleTerminal.PortName + " opened");
+                            StateNormal = BtnImage.StateOnNormal;
+                            StateHover = BtnImage.StateOnHover;
 
-                    btnConnect.Text = "Close";
+                            toolTip.SetToolTip(btnState, "Закрыть подключение");
+
+                            Utils.WriteLog($"{ScaleTerminal.PortName} opened");
+                        }
+                    }
+                    else
+                    {
+                        if (ScaleTerminal.IsOpen)
+                        {
+                            ScaleTerminal.Close();
+
+                            Weight = 0;
+
+                            StateNormal = BtnImage.StateOffNormal;
+                            StateHover = BtnImage.StateOffHover;
+
+                            toolTip.SetToolTip(btnState, "Открыть подключение");
+
+                            Utils.WriteLog($"{ScaleTerminal.PortName} closed");
+                        }
+                    }
+
+                    SetBtnImage(btnState,
+                        MouseIsOverControl(btnState) ?
+                            StateHover :
+                            StateNormal);
                 }
-                else
+                catch (Exception e)
                 {
-                    ScaleTerminal.Close();
-
-                    ListBoxAdd(ScaleTerminal.PortName + " closed");
-
-                    btnConnect.Text = "Open";
+                    Utils.WriteLogError(e);
                 }
             }
-            catch (Exception e)
-            {
-                ListBoxAdd("error: " + e.Message);
-            }
-        }
-
-        private void BtnConnect_Click(object sender, EventArgs e)
-        {
-            SetComPortState(!ScaleTerminal.IsOpen);
         }
 
         private void BtnClose_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void BtnState_MouseEnter(object sender, EventArgs e)
+        {
+            SetBtnImage(btnState, StateHover);
+        }
+
+        private void BtnState_MouseLeave(object sender, EventArgs e)
+        {
+            SetBtnImage(btnState, StateNormal);
+        }
+
+        private void BtnAbout_MouseEnter(object sender, EventArgs e)
+        {
+            SetBtnImage(btnAbout, BtnImage.AboutHover);
+        }
+
+        private void BtnAbout_MouseLeave(object sender, EventArgs e)
+        {
+            SetBtnImage(btnAbout, BtnImage.AboutNormal);
         }
 
         private void BtnSettings_MouseEnter(object sender, EventArgs e)
@@ -174,29 +239,29 @@ namespace WeightTerminal
         {
             var prevStateOpen = ScaleTerminal.IsOpen;
 
-            SetComPortState(false);
+            TerminalState = false;
 
             if (CheckComPortsExists())
             {
-                btnConnect.Enabled = true;
+                btnState.Enabled = true;
             }
             else
             {
-                btnConnect.Enabled = false;
+                btnState.Enabled = false;
 
                 return;
             }
 
             if (string.IsNullOrEmpty(AppSettings.Default.ComPortName))
             {
-                ListBoxAdd("error: comportname empty. check settings");
+                Utils.WriteLogError("check settings: comportname empty");
 
                 return;
             }
 
             if (AppSettings.Default.TerminalType == Enums.TerminalType.None)
             {
-                ListBoxAdd("error: terminaltype=none. check settings");
+                Utils.WriteLogError("check settings: terminaltype=none");
 
                 return;
             }
@@ -205,9 +270,11 @@ namespace WeightTerminal
 
             ScaleTerminal.Type = (TerminalType)AppSettings.Default.TerminalType;
 
+            ScaleTerminal.TerminalMassUnit = (MassUnit)AppSettings.Default.TerminalMassUnit;
+
             if (prevStateOpen)
             {
-                SetComPortState(true);
+                TerminalState = true;
             }
         }
 
@@ -222,6 +289,48 @@ namespace WeightTerminal
         private void BtnSettings_Click(object sender, EventArgs e)
         {
             ShowSettings();
+        }
+
+        private void BtnState_Click(object sender, EventArgs e)
+        {
+            TerminalState = !TerminalState;
+        }
+
+        private void ShowAbout()
+        {
+            FrmAbout.Show(new FrmAbout.Options()
+            {
+                Link = Resources.GitHubLink,
+                AppNameFontSize = 24
+            });
+        }
+
+        private void BtnAbout_Click(object sender, EventArgs e)
+        {
+            ShowAbout();
+        }
+
+        private void Main_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.F1:
+                    if (e.Modifiers == Keys.None)
+                        ShowAbout();
+                    break;
+                case Keys.F4:
+                    if (e.Modifiers == Keys.None)
+                        TerminalState = !TerminalState;
+                    break;
+                case Keys.F8:
+                    if (e.Modifiers == Keys.None)
+                        ShowSettings();
+                    break;
+                case Keys.O:
+                    if (e.Modifiers == Keys.Control)
+                        ShowSettings();
+                    break;
+            }
         }
     }
 }

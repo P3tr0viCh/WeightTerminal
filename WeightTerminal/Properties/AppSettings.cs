@@ -29,5 +29,15 @@ namespace WeightTerminal.Properties
         [DisplayName("Терминал")]
         [Description("Тип терминала")]
         public TerminalType TerminalType { get; set; } = TerminalType.None;
+
+        [Category("Весовой терминал")]
+        [DisplayName("Единицы измерения")]
+        [Description("Единицы измерения терминала")]
+        public MassUnit TerminalMassUnit { get; set; } = MassUnit.kg;
+
+        [Category("Формат")]
+        [DisplayName("Единицы измерения")]
+        [Description("Единицы измерения в окне программы")]
+        public MassUnit OutputMassUnit { get; set; } = MassUnit.kg;
     }
 }

@@ -17,6 +17,17 @@ namespace WeightTerminal
             MidlVda12 = ScaleTerminal.TerminalType.MidlVda12,
             [Description("Микросим М0601")]
             MicrosimM0601 = ScaleTerminal.TerminalType.MicrosimM0601,
+            [Description("Токвес SH-50")]
+            TokvesSh50 = ScaleTerminal.TerminalType.TokvesSh50,
+        }
+
+        [TypeConverter(typeof(EnumDescriptionConverter))]
+        public enum MassUnit
+        {
+            [Description("Килограммы")]
+            kg = ScaleTerminal.MassUnit.kg,
+            [Description("Тонны")]
+            tn = ScaleTerminal.MassUnit.tn,
         }
     }
 }
