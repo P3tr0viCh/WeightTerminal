@@ -32,11 +32,11 @@ namespace WeightTerminal
         {
             InitializeComponent();
 
-            Utils.Log.WriteProgramStart();
+            Utils.Log.Default.WriteProgramStart();
 
             AppSettings.Directory = Files.ExecutableDirectory();
 
-            Debug.WriteLine("Settings: " + AppSettings.FilePath);
+            Utils.Log.WriteDebug("Settings: " + AppSettings.FilePath);
         }
 
         protected override void WndProc(ref Message m)
@@ -64,7 +64,7 @@ namespace WeightTerminal
 
         private void ScaleTerminal_LineReceived(object sender, LineEventArgs e)
         {
-            Utils.WriteDebug($">{e.Line}<");
+            Utils.Log.WriteDebug($">{e.Line}<");
         }
 
         private int weight = 0;
@@ -81,7 +81,7 @@ namespace WeightTerminal
                 switch (AppSettings.Default.OutputMassUnit)
                 {
                     case Enums.MassUnit.tn:
-                        lblWeight.Text = (weight / 1000).ToString("0.000");
+                        lblWeight.Text = (weight / 1000.0).ToString("0.000");
 
                         break;
                     default:
@@ -103,21 +103,21 @@ namespace WeightTerminal
 
             AppSettingsSave();
 
-            Utils.Log.WriteProgramStop();
+            Utils.Log.Default.WriteProgramStop();
         }
 
         public void AppSettingsLoad()
         {
             if (AppSettings.Default.Load()) return;
 
-            Utils.WriteLogError(AppSettings.LastError);
+            Utils.Log.WriteError(AppSettings.LastError);
         }
 
         public void AppSettingsSave()
         {
             if (AppSettings.Default.Save()) return;
 
-            Utils.WriteLogError(AppSettings.LastError);
+            Utils.Log.WriteError(AppSettings.LastError);
         }
 
         private bool CheckComPortsExists()
@@ -126,13 +126,13 @@ namespace WeightTerminal
 
             if (ports.Length != 0)
             {
-                Utils.WriteLog($"COM ports count: {ports.Length}");
+                Utils.Log.WriteError($"COM ports count: {ports.Length}");
 
                 return true;
             }
             else
             {
-                Utils.WriteLog("COM PORT not found");
+                Utils.Log.WriteError("COM PORT not found");
 
                 return false;
             }
@@ -161,6 +161,20 @@ namespace WeightTerminal
                     {
                         if (!ScaleTerminal.IsOpen)
                         {
+                            if (ScaleTerminal.Type == TerminalType.None)
+                            {
+                                Utils.Msg.Error(Resources.ErrorTerminalTypeNone);
+
+                                return;
+                            }
+
+                            if (string.IsNullOrEmpty(ScaleTerminal.PortName))
+                            {
+                                Utils.Msg.Error(Resources.ErrorTerminalPortEmpty);
+
+                                return;
+                            }
+
                             ScaleTerminal.Open();
 
                             StateNormal = BtnImage.StateOnNormal;
@@ -168,7 +182,7 @@ namespace WeightTerminal
 
                             toolTip.SetToolTip(btnState, "Закрыть подключение");
 
-                            Utils.WriteLog($"{ScaleTerminal.PortName} opened");
+                            Utils.Log.Write($"{ScaleTerminal.PortName} opened");
                         }
                     }
                     else
@@ -184,7 +198,7 @@ namespace WeightTerminal
 
                             toolTip.SetToolTip(btnState, "Открыть подключение");
 
-                            Utils.WriteLog($"{ScaleTerminal.PortName} closed");
+                            Utils.Log.Write($"{ScaleTerminal.PortName} closed");
                         }
                     }
 
@@ -195,7 +209,9 @@ namespace WeightTerminal
                 }
                 catch (Exception e)
                 {
-                    Utils.WriteLogError(e);
+                    Utils.Log.WriteError(e);
+
+                    Utils.Msg.Error(Resources.ErrorError, e.Message);
                 }
             }
         }
@@ -254,14 +270,14 @@ namespace WeightTerminal
 
             if (string.IsNullOrEmpty(AppSettings.Default.ComPortName))
             {
-                Utils.WriteLogError("check settings: comportname empty");
+                Utils.Log.WriteError("check settings: comportname empty");
 
                 return;
             }
 
             if (AppSettings.Default.TerminalType == Enums.TerminalType.None)
             {
-                Utils.WriteLogError("check settings: terminaltype=none");
+                Utils.Log.WriteError("check settings: terminaltype=none");
 
                 return;
             }

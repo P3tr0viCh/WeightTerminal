@@ -16,7 +16,7 @@ namespace WA
         {
             using (var frm = new FrmSettings())
             {
-                Utils.Log.WriteFormOpen(frm);
+                Utils.Log.Default.WriteFormOpen(frm);
 
                 try
                 {
@@ -37,7 +37,7 @@ namespace WA
                 }
                 finally
                 {
-                    Utils.Log.WriteFormClose(frm);
+                    Utils.Log.Default.WriteFormClose(frm);
                 }
             }
         }

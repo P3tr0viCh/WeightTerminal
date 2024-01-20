@@ -61,6 +61,36 @@ namespace WeightTerminal.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ошибка:
+        ///{0}.
+        /// </summary>
+        internal static string ErrorError {
+            get {
+                return ResourceManager.GetString("ErrorError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ошибка:
+        ///Не указан порт, к которому подключен терминал..
+        /// </summary>
+        internal static string ErrorTerminalPortEmpty {
+            get {
+                return ResourceManager.GetString("ErrorTerminalPortEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ошибка:
+        ///Не указан тип весового терминала..
+        /// </summary>
+        internal static string ErrorTerminalTypeNone {
+            get {
+                return ResourceManager.GetString("ErrorTerminalTypeNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to https://github.com/P3tr0viCh/WeightTerminal.
         /// </summary>
         internal static string GitHubLink {
