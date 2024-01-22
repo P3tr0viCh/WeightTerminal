@@ -132,4 +132,13 @@
   <data name="GitHubLink" xml:space="preserve">
     <value>https://github.com/P3tr0viCh/WeightTerminal</value>
   </data>
+  <data name="ToolTipKey" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="ToolTipStateClosing" xml:space="preserve">
+    <value>Закрыть подключение</value>
+  </data>
+  <data name="ToolTipStateOpening" xml:space="preserve">
+    <value>Открыть подключение</value>
+  </data>
 </root>

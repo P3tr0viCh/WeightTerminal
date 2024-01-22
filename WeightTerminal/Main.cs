@@ -1,11 +1,11 @@
-﻿using P3tr0viCh.Utils;
+﻿using P3tr0viCh.ScaleTerminal;
+using P3tr0viCh.Utils;
 using System;
-using System.Diagnostics;
 using System.IO.Ports;
 using System.Windows.Forms;
 using WA;
 using WeightTerminal.Properties;
-using static P3tr0viCh.Utils.ScaleTerminal;
+using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
 
 namespace WeightTerminal
 {
@@ -48,9 +48,13 @@ namespace WeightTerminal
 
         private void Main_Load(object sender, EventArgs e)
         {
+            SetBtnImage(btnAbout, BtnImage.AboutNormal);
             SetBtnImage(btnState, StateNormal);
             SetBtnImage(btnSettings, BtnImage.SettingsNormal);
-            SetBtnImage(btnAbout, BtnImage.AboutNormal);
+
+            SetToolTip(btnAbout, KeyAbout);
+            SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
+            SetToolTip(btnSettings, KeySettings1);
 
             ScaleTerminal.LineReceived += ScaleTerminal_LineReceived;
             ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
@@ -126,7 +130,7 @@ namespace WeightTerminal
 
             if (ports.Length != 0)
             {
-                Utils.Log.WriteError($"COM ports count: {ports.Length}");
+                Utils.Log.Write($"COM ports count: {ports.Length}");
 
                 return true;
             }
@@ -141,6 +145,21 @@ namespace WeightTerminal
         private void SetBtnImage(PictureBox button, BtnImage image)
         {
             button.Image = imageList.Images[(int)image];
+        }
+
+        private void SetToolTip(Control control, string text, Keys keys)
+        {
+            if (keys != Keys.None)
+            {
+                text = string.Format(Resources.ToolTipKey, text, keys);
+            }
+
+            toolTip.SetToolTip(control, text);
+        }
+        
+        private void SetToolTip(Control control, Keys keys)
+        {
+            SetToolTip(control, toolTip.GetToolTip(control), keys);
         }
 
         private bool MouseIsOverControl(Control control) =>
@@ -180,9 +199,9 @@ namespace WeightTerminal
                             StateNormal = BtnImage.StateOnNormal;
                             StateHover = BtnImage.StateOnHover;
 
-                            toolTip.SetToolTip(btnState, "Закрыть подключение");
+                            SetToolTip(btnState, Resources.ToolTipStateClosing, KeyState);
 
-                            Utils.Log.Write($"{ScaleTerminal.PortName} opened");
+                            Utils.Log.Write($"{ScaleTerminal.PortName} opened. type={ScaleTerminal.Type}");
                         }
                     }
                     else
@@ -196,7 +215,7 @@ namespace WeightTerminal
                             StateNormal = BtnImage.StateOffNormal;
                             StateHover = BtnImage.StateOffHover;
 
-                            toolTip.SetToolTip(btnState, "Открыть подключение");
+                            SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
 
                             Utils.Log.Write($"{ScaleTerminal.PortName} closed");
                         }
@@ -326,25 +345,25 @@ namespace WeightTerminal
             ShowAbout();
         }
 
+
+        private const Keys KeyAbout = Keys.F1;
+        private const Keys KeyState = Keys.F4;
+        private const Keys KeySettings1 = Keys.F8;
+        private const Keys KeySettings2 = Keys.O | Keys.Control;
+
         private void Main_KeyUp(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
+            switch (e.KeyData)
             {
-                case Keys.F1:
-                    if (e.Modifiers == Keys.None)
-                        ShowAbout();
+                case KeyAbout:
+                    ShowAbout();
                     break;
-                case Keys.F4:
-                    if (e.Modifiers == Keys.None)
-                        TerminalState = !TerminalState;
+                case KeyState:
+                    TerminalState = !TerminalState;
                     break;
-                case Keys.F8:
-                    if (e.Modifiers == Keys.None)
-                        ShowSettings();
-                    break;
-                case Keys.O:
-                    if (e.Modifiers == Keys.Control)
-                        ShowSettings();
+                case KeySettings1:
+                case KeySettings2:
+                    ShowSettings();
                     break;
             }
         }

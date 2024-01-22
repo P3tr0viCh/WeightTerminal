@@ -92,6 +92,7 @@
             this.MinimumSize = new System.Drawing.Size(504, 400);
             this.Name = "FrmSettings";
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Настройки";
             this.Load += new System.EventHandler(this.FrmSettings_Load);
             this.panelBottom.ResumeLayout(false);

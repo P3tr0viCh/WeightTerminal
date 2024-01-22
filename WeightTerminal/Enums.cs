@@ -1,6 +1,6 @@
-﻿using static P3tr0viCh.Utils.Converters;
+﻿using P3tr0viCh.ScaleTerminal;
 using System.ComponentModel;
-using P3tr0viCh.Utils;
+using static P3tr0viCh.Utils.Converters;
 
 namespace WeightTerminal
 {

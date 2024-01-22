@@ -98,5 +98,32 @@ namespace WeightTerminal.Properties {
                 return ResourceManager.GetString("GitHubLink", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} ({1}).
+        /// </summary>
+        internal static string ToolTipKey {
+            get {
+                return ResourceManager.GetString("ToolTipKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Закрыть подключение.
+        /// </summary>
+        internal static string ToolTipStateClosing {
+            get {
+                return ResourceManager.GetString("ToolTipStateClosing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Открыть подключение.
+        /// </summary>
+        internal static string ToolTipStateOpening {
+            get {
+                return ResourceManager.GetString("ToolTipStateOpening", resourceCulture);
+            }
+        }
     }
 }
