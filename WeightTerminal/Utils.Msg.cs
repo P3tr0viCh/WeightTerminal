@@ -8,7 +8,7 @@ namespace WeightTerminal
         {
             public static void Info(string text = "Hello, world!")
             {
-                Log.Write(text.Replace("\r\n", Str.Space).Replace("\n", Str.Space).Replace("\r", Str.Space));
+                Log.Info(text.Replace("\r\n", Str.Space).Replace("\n", Str.Space).Replace("\r", Str.Space));
 
                 P3tr0viCh.Utils.Msg.Info(text);
             }
@@ -25,11 +25,11 @@ namespace WeightTerminal
 
             public static bool Question(string text = "To be or not to be?")
             {
-                Log.Write(text.Replace("\r\n", Str.Space).Replace("\n", Str.Space).Replace("\r", Str.Space));
+                Log.Info(text.Replace("\r\n", Str.Space).Replace("\n", Str.Space).Replace("\r", Str.Space));
 
                 var result = P3tr0viCh.Utils.Msg.Question(text);
 
-                Log.Write(result ? "yes" : "no");
+                Log.Info(result ? "yes" : "no");
 
                 return result;
             }

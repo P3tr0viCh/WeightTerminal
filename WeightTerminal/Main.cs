@@ -36,7 +36,7 @@ namespace WeightTerminal
 
             AppSettings.Directory = Files.ExecutableDirectory();
 
-            Utils.Log.WriteDebug("Settings: " + AppSettings.FilePath);
+            Utils.Log.Debug($"Settings: {AppSettings.FilePath}");
         }
 
         protected override void WndProc(ref Message m)
@@ -68,7 +68,7 @@ namespace WeightTerminal
 
         private void ScaleTerminal_LineReceived(object sender, LineEventArgs e)
         {
-            Utils.Log.WriteDebug($">{e.Line}<");
+            Utils.Log.Debug($">{e.Line}<");
         }
 
         private int weight = 0;
@@ -114,14 +114,14 @@ namespace WeightTerminal
         {
             if (AppSettings.Default.Load()) return;
 
-            Utils.Log.WriteError(AppSettings.LastError);
+            Utils.Log.Error(AppSettings.LastError);
         }
 
         public void AppSettingsSave()
         {
             if (AppSettings.Default.Save()) return;
 
-            Utils.Log.WriteError(AppSettings.LastError);
+            Utils.Log.Error(AppSettings.LastError);
         }
 
         private bool CheckComPortsExists()
@@ -130,13 +130,13 @@ namespace WeightTerminal
 
             if (ports.Length != 0)
             {
-                Utils.Log.Write($"COM ports count: {ports.Length}");
+                Utils.Log.Info($"COM ports count: {ports.Length}");
 
                 return true;
             }
             else
             {
-                Utils.Log.WriteError("COM PORT not found");
+                Utils.Log.Error("COM PORT not found");
 
                 return false;
             }
@@ -201,7 +201,7 @@ namespace WeightTerminal
 
                             SetToolTip(btnState, Resources.ToolTipStateClosing, KeyState);
 
-                            Utils.Log.Write($"{ScaleTerminal.PortName} opened. type={ScaleTerminal.Type}");
+                            Utils.Log.Info($"{ScaleTerminal.PortName} opened. type={ScaleTerminal.Type}");
                         }
                     }
                     else
@@ -217,7 +217,7 @@ namespace WeightTerminal
 
                             SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
 
-                            Utils.Log.Write($"{ScaleTerminal.PortName} closed");
+                            Utils.Log.Info($"{ScaleTerminal.PortName} closed");
                         }
                     }
 
@@ -228,7 +228,7 @@ namespace WeightTerminal
                 }
                 catch (Exception e)
                 {
-                    Utils.Log.WriteError(e);
+                    Utils.Log.Error(e);
 
                     Utils.Msg.Error(Resources.ErrorError, e.Message);
                 }
@@ -289,14 +289,14 @@ namespace WeightTerminal
 
             if (string.IsNullOrEmpty(AppSettings.Default.ComPortName))
             {
-                Utils.Log.WriteError("check settings: comportname empty");
+                Utils.Log.Error("check settings: comportname empty");
 
                 return;
             }
 
             if (AppSettings.Default.TerminalType == Enums.TerminalType.None)
             {
-                Utils.Log.WriteError("check settings: terminaltype=none");
+                Utils.Log.Error("check settings: terminaltype=none");
 
                 return;
             }

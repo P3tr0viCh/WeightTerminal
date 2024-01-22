@@ -19,34 +19,34 @@ namespace WeightTerminal
                 }
             }
 
-            public static void WriteDebug(string s, [CallerMemberName] string memberName = "")
+            public static void Debug(string s, [CallerMemberName] string memberName = "")
             {
-                Debug.WriteLine(memberName + ": " + s);
+                System.Diagnostics.Debug.WriteLine(memberName + ": " + s);
             }
 
-            public static void Write(string s, [CallerMemberName] string memberName = "")
+            public static void Info(string s, [CallerMemberName] string memberName = "")
             {
                 var text = string.Format("{0}: {1}", memberName, s);
 
-                Debug.WriteLine(text);
+                System.Diagnostics.Debug.WriteLine(text);
 
                 Default.Write(text);
             }
 
-            public static void WriteError(Exception e, [CallerMemberName] string memberName = "")
+            public static void Error(Exception e, [CallerMemberName] string memberName = "")
             {
                 if (e == null) return;
 
-                WriteError(e.Message, memberName);
+                Error(e.Message, memberName);
 
-                WriteError(e.InnerException, memberName);
+                Error(e.InnerException, memberName);
             }
 
-            public static void WriteError(string err, [CallerMemberName] string memberName = "")
+            public static void Error(string err, [CallerMemberName] string memberName = "")
             {
                 var error = string.Format("{0} fail: {1}", memberName, err);
 
-                Debug.WriteLine(error);
+                System.Diagnostics.Debug.WriteLine(error);
 
                 Default.Write(error);
             }
