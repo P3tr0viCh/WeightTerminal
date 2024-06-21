@@ -36,7 +36,7 @@ namespace WeightTerminal
 
             AppSettings.Directory = Files.ExecutableDirectory();
 
-            Utils.Log.Debug($"Settings: {AppSettings.FilePath}");
+            DebugWrite.Line($"Settings: {AppSettings.FilePath}", "Main");
         }
 
         protected override void WndProc(ref Message m)
@@ -56,9 +56,6 @@ namespace WeightTerminal
             SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
             SetToolTip(btnSettings, KeySettings1);
 
-            ScaleTerminal.LineReceived += ScaleTerminal_LineReceived;
-            ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
-
             AppSettingsLoad();
 
             SettingsChanged();
@@ -66,10 +63,12 @@ namespace WeightTerminal
             Weight = 0;
         }
 
+#if DEBUG
         private void ScaleTerminal_LineReceived(object sender, LineEventArgs e)
         {
-            Utils.Log.Debug($">{e.Line}<");
+            DebugWrite.Line($">{e.Line}<");
         }
+#endif
 
         private int weight = 0;
         public int Weight
@@ -96,9 +95,23 @@ namespace WeightTerminal
             }
         }
 
+        private void WeightReceived(int weight)
+        {
+            try
+            {
+                Invoke((Action)(() => Weight = weight));
+            }
+            catch (Exception e)
+            {
+                DebugWrite.Error(e);
+            }
+        }
+
         private void ScaleTerminal_WeightReceived(object sender, WeightEventArgs e)
         {
-            this.InvokeIfNeeded(() => Weight = e.Weight);
+            DebugWrite.Line($"{e.Weight}");
+
+            WeightReceived(e.Weight);
         }
 
         private void Main_FormClosed(object sender, FormClosedEventArgs e)
@@ -112,14 +125,14 @@ namespace WeightTerminal
 
         public void AppSettingsLoad()
         {
-            if (AppSettings.Default.Load()) return;
+            if (AppSettings.Load()) return;
 
             Utils.Log.Error(AppSettings.LastError);
         }
 
         public void AppSettingsSave()
         {
-            if (AppSettings.Default.Save()) return;
+            if (AppSettings.Save()) return;
 
             Utils.Log.Error(AppSettings.LastError);
         }
@@ -156,7 +169,7 @@ namespace WeightTerminal
 
             toolTip.SetToolTip(control, text);
         }
-        
+
         private void SetToolTip(Control control, Keys keys)
         {
             SetToolTip(control, toolTip.GetToolTip(control), keys);
@@ -193,6 +206,11 @@ namespace WeightTerminal
 
                                 return;
                             }
+#if DEBUG
+                            ScaleTerminal.LineReceived += ScaleTerminal_LineReceived;
+#endif
+                            ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
+
 
                             ScaleTerminal.Open();
 
@@ -206,11 +224,16 @@ namespace WeightTerminal
                     }
                     else
                     {
+#if DEBUG
+                        ScaleTerminal.LineReceived -= ScaleTerminal_LineReceived;
+#endif
+                        ScaleTerminal.WeightReceived -= ScaleTerminal_WeightReceived;
+
                         if (ScaleTerminal.IsOpen)
                         {
                             ScaleTerminal.Close();
 
-                            Weight = 0;
+                            Invoke((Action)(() => Weight = 0));
 
                             StateNormal = BtnImage.StateOffNormal;
                             StateHover = BtnImage.StateOffHover;
@@ -272,9 +295,7 @@ namespace WeightTerminal
 
         private void SettingsChanged()
         {
-            var prevStateOpen = ScaleTerminal.IsOpen;
-
-            TerminalState = false;
+            Weight = 0;
 
             if (CheckComPortsExists())
             {
@@ -287,7 +308,7 @@ namespace WeightTerminal
                 return;
             }
 
-            if (string.IsNullOrEmpty(AppSettings.Default.ComPortName))
+            if (AppSettings.Default.ComPortName.IsEmpty())
             {
                 Utils.Log.Error("check settings: comportname empty");
 
@@ -306,18 +327,22 @@ namespace WeightTerminal
             ScaleTerminal.Type = (TerminalType)AppSettings.Default.TerminalType;
 
             ScaleTerminal.TerminalMassUnit = (MassUnit)AppSettings.Default.TerminalMassUnit;
-
-            if (prevStateOpen)
-            {
-                TerminalState = true;
-            }
         }
 
         private void ShowSettings()
         {
+            var prevStateOpen = ScaleTerminal.IsOpen;
+
+            TerminalState = false;
+
             if (FrmSettings.ShowDlg(this))
             {
                 SettingsChanged();
+            }
+
+            if (prevStateOpen)
+            {
+                TerminalState = true;
             }
         }
 
@@ -344,7 +369,6 @@ namespace WeightTerminal
         {
             ShowAbout();
         }
-
 
         private const Keys KeyAbout = Keys.F1;
         private const Keys KeyState = Keys.F4;

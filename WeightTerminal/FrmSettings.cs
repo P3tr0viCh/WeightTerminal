@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using WeightTerminal;
-using WeightTerminal.Properties;
 
 namespace WA
 {
@@ -20,17 +19,17 @@ namespace WA
 
                 try
                 {
-                    AppSettings.Default.Save();
+                    AppSettings.Save();
 
                     if (frm.ShowDialog(owner) == DialogResult.OK)
                     {
-                        AppSettings.Default.Save();
+                        AppSettings.Save();
 
                         return true;
                     }
                     else
                     {
-                        AppSettings.Default.Load();
+                        AppSettings.Load();
 
                         return false;
                     }

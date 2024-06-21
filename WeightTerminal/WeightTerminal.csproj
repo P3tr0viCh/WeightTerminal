@@ -41,10 +41,10 @@
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="P3tr0viCh.ScaleTerminal">
-      <HintPath>..\..\..\..\Projects.exe\P3tr0viCh.ScaleTerminal\Release\P3tr0viCh.ScaleTerminal.dll</HintPath>
+      <HintPath>..\..\..\..\Projects.exe\P3tr0viCh.ScaleTerminal\$(Configuration)\P3tr0viCh.ScaleTerminal.dll</HintPath>
     </Reference>
     <Reference Include="P3tr0viCh.Utils">
-      <HintPath>..\..\..\..\Projects.exe\P3tr0viCh.Utils\Release\P3tr0viCh.Utils.dll</HintPath>
+      <HintPath>..\..\..\..\Projects.exe\P3tr0viCh.Utils\$(Configuration)\P3tr0viCh.Utils.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

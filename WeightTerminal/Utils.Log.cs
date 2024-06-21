@@ -1,7 +1,6 @@
 ﻿using P3tr0viCh.Utils;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace WeightTerminal
 {
@@ -19,16 +18,11 @@ namespace WeightTerminal
                 }
             }
 
-            public static void Debug(string s, [CallerMemberName] string memberName = "")
-            {
-                System.Diagnostics.Debug.WriteLine(memberName + ": " + s);
-            }
-
             public static void Info(string s, [CallerMemberName] string memberName = "")
             {
                 var text = string.Format("{0}: {1}", memberName, s);
 
-                System.Diagnostics.Debug.WriteLine(text);
+                DebugWrite.Line(s, memberName);
 
                 Default.Write(text);
             }
@@ -46,7 +40,7 @@ namespace WeightTerminal
             {
                 var error = string.Format("{0} fail: {1}", memberName, err);
 
-                System.Diagnostics.Debug.WriteLine(error);
+                DebugWrite.Error(err, memberName);
 
                 Default.Write(error);
             }
