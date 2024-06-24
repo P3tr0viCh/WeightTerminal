@@ -1,23 +1,11 @@
 ﻿using P3tr0viCh.Utils;
 using System.ComponentModel;
 using WeightTerminal.Properties;
+using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
 using static P3tr0viCh.Utils.Converters;
-using static WeightTerminal.Enums;
 
 namespace WeightTerminal
 {
-    public class LocalizedCategoryAttribute : CategoryAttribute
-    {
-        static string Localize(string key)
-        {
-            return Resources.ResourceManager.GetString(key);
-        }
-
-        public LocalizedCategoryAttribute(string key) : base(Localize(key))
-        {
-        }
-    }
-
     public class AppSettings : SettingsBase<AppSettings>
     {
         [Category("Весовой терминал")]

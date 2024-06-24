@@ -1,7 +1,16 @@
-﻿using P3tr0viCh.ScaleTerminal;
+﻿#if DEBUG
+//#define SHOW_RAWDATA
+#endif
+
+using P3tr0viCh.ScaleTerminal;
 using P3tr0viCh.Utils;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using WA;
 using WeightTerminal.Properties;
@@ -48,6 +57,14 @@ namespace WeightTerminal
 
         private void Main_Load(object sender, EventArgs e)
         {
+#if SHOW_RAWDATA
+            ScaleTerminal.LineReceived += ScaleTerminal_LineReceived;
+            ScaleTerminal.ByteReceived += ScaleTerminal_ByteReceived;
+#endif
+
+            ScaleTerminal.HeadReceived += ScaleTerminal_HeadReceived;
+            ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
+
             SetBtnImage(btnAbout, BtnImage.AboutNormal);
             SetBtnImage(btnState, StateNormal);
             SetBtnImage(btnSettings, BtnImage.SettingsNormal);
@@ -63,10 +80,17 @@ namespace WeightTerminal
             Weight = 0;
         }
 
-#if DEBUG
+#if SHOW_RAWDATA
         private void ScaleTerminal_LineReceived(object sender, LineEventArgs e)
         {
             DebugWrite.Line($">{e.Line}<");
+        }
+
+        private void ScaleTerminal_ByteReceived(object sender, ByteEventArgs e)
+        {
+            var bits = new BitArray(new byte[] { e.B });
+
+            DebugWrite.Line(string.Join("", bits.Cast<bool>().Reverse().Select(bit => bit ? '1' : '0')));
         }
 #endif
 
@@ -83,7 +107,7 @@ namespace WeightTerminal
 
                 switch (AppSettings.Default.OutputMassUnit)
                 {
-                    case Enums.MassUnit.tn:
+                    case MassUnit.tn:
                         lblWeight.Text = (weight / 1000.0).ToString("0.000");
 
                         break;
@@ -92,6 +116,19 @@ namespace WeightTerminal
 
                         break;
                 }
+            }
+        }
+
+        private void ScaleTerminal_HeadReceived(object sender, HeadEventArgs e)
+        {
+            switch (ScaleTerminal.Type)
+            {
+                case TerminalType.Newton42Byte:
+                    var head = (TerminalNewton42Head)e.Head;
+
+                    DebugWrite.Line($"Stable = {head.Stable}, Overload = {head.Overload}, DPoints = {head.DPoints}, Channels = {head.Channels}");
+
+                    break;
             }
         }
 
@@ -200,17 +237,12 @@ namespace WeightTerminal
                                 return;
                             }
 
-                            if (string.IsNullOrEmpty(ScaleTerminal.PortName))
+                            if (ScaleTerminal.PortName.IsEmpty())
                             {
                                 Utils.Msg.Error(Resources.ErrorTerminalPortEmpty);
 
                                 return;
                             }
-#if DEBUG
-                            ScaleTerminal.LineReceived += ScaleTerminal_LineReceived;
-#endif
-                            ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
-
 
                             ScaleTerminal.Open();
 
@@ -224,11 +256,6 @@ namespace WeightTerminal
                     }
                     else
                     {
-#if DEBUG
-                        ScaleTerminal.LineReceived -= ScaleTerminal_LineReceived;
-#endif
-                        ScaleTerminal.WeightReceived -= ScaleTerminal_WeightReceived;
-
                         if (ScaleTerminal.IsOpen)
                         {
                             ScaleTerminal.Close();
@@ -297,29 +324,16 @@ namespace WeightTerminal
         {
             Weight = 0;
 
-            if (CheckComPortsExists())
-            {
-                btnState.Enabled = true;
-            }
-            else
-            {
-                btnState.Enabled = false;
-
-                return;
-            }
+            btnState.Enabled = CheckComPortsExists();
 
             if (AppSettings.Default.ComPortName.IsEmpty())
             {
                 Utils.Log.Error("check settings: comportname empty");
-
-                return;
             }
 
-            if (AppSettings.Default.TerminalType == Enums.TerminalType.None)
+            if (AppSettings.Default.TerminalType == TerminalType.None)
             {
                 Utils.Log.Error("check settings: terminaltype=none");
-
-                return;
             }
 
             ScaleTerminal.SerialPort.PortName = AppSettings.Default.ComPortName;
@@ -337,10 +351,11 @@ namespace WeightTerminal
 
             if (FrmSettings.ShowDlg(this))
             {
+                AppSettings.Load();
                 SettingsChanged();
             }
 
-            if (prevStateOpen)
+            if (prevStateOpen && ScaleTerminal.Type != TerminalType.None)
             {
                 TerminalState = true;
             }
