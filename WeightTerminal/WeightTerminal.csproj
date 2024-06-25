@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\Projects.exe\WeightTerminal\Debug\</OutputPath>
+    <OutputPath>..\..\..\..\Projects.exe\WeightTerminal\Debug\0.0.0.0\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -39,6 +39,9 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="P3tr0viCh.AppUpdate">
+      <HintPath>..\..\..\..\Projects.exe\P3tr0viCh.AppUpdate\Release\P3tr0viCh.AppUpdate.dll</HintPath>
     </Reference>
     <Reference Include="P3tr0viCh.ScaleTerminal">
       <HintPath>..\..\..\..\Projects.exe\P3tr0viCh.ScaleTerminal\$(Configuration)\P3tr0viCh.ScaleTerminal.dll</HintPath>
@@ -71,6 +74,7 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="UpdateApp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="AppSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

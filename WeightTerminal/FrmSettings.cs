@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using WeightTerminal;
 
-namespace WA
+namespace WeightTerminal
 {
     public partial class FrmSettings : Form
     {

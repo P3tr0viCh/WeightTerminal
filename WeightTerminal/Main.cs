@@ -2,17 +2,12 @@
 //#define SHOW_RAWDATA
 #endif
 
+using P3tr0viCh.AppUpdate;
 using P3tr0viCh.ScaleTerminal;
 using P3tr0viCh.Utils;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO.Ports;
-using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
-using WA;
 using WeightTerminal.Properties;
 using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
 
@@ -30,12 +25,16 @@ namespace WeightTerminal
             StateOffHover = 5,
             AboutNormal = 6,
             AboutHover = 7,
+            UpdateAppNormal = 8,
+            UpdateAppHover = 9,
         }
-
-        private readonly ScaleTerminal ScaleTerminal = new ScaleTerminal();
 
         private BtnImage StateNormal = BtnImage.StateOffNormal;
         private BtnImage StateHover = BtnImage.StateOffHover;
+
+        private readonly ScaleTerminal ScaleTerminal = new ScaleTerminal();
+
+        private ImageBtn ibtnState;
 
         public Main()
         {
@@ -65,9 +64,11 @@ namespace WeightTerminal
             ScaleTerminal.HeadReceived += ScaleTerminal_HeadReceived;
             ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
 
-            SetBtnImage(btnAbout, BtnImage.AboutNormal);
-            SetBtnImage(btnState, StateNormal);
-            SetBtnImage(btnSettings, BtnImage.SettingsNormal);
+            new ImageBtn(btnAbout, imageList, BtnImage.AboutNormal.ToInt(), BtnImage.AboutHover.ToInt());
+            new ImageBtn(btnSettings, imageList, BtnImage.SettingsNormal.ToInt(), BtnImage.SettingsHover.ToInt());
+            new ImageBtn(btnUpdateApp, imageList, BtnImage.UpdateAppNormal.ToInt(), BtnImage.UpdateAppHover.ToInt());
+
+            ibtnState = new ImageBtn(btnState, imageList, StateNormal.ToInt(), StateHover.ToInt());
 
             SetToolTip(btnAbout, KeyAbout);
             SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
@@ -76,6 +77,8 @@ namespace WeightTerminal
             AppSettingsLoad();
 
             SettingsChanged();
+
+            UpdateApp.Default.StatusChanged += UpdateApp_StatusChanged;
 
             Weight = 0;
         }
@@ -192,11 +195,6 @@ namespace WeightTerminal
             }
         }
 
-        private void SetBtnImage(PictureBox button, BtnImage image)
-        {
-            button.Image = imageList.Images[(int)image];
-        }
-
         private void SetToolTip(Control control, string text, Keys keys)
         {
             if (keys != Keys.None)
@@ -210,6 +208,11 @@ namespace WeightTerminal
         private void SetToolTip(Control control, Keys keys)
         {
             SetToolTip(control, toolTip.GetToolTip(control), keys);
+        }
+
+        private void SetToolTip(Control control, string text)
+        {
+            SetToolTip(control, text, Keys.None);
         }
 
         private bool MouseIsOverControl(Control control) =>
@@ -271,10 +274,7 @@ namespace WeightTerminal
                         }
                     }
 
-                    SetBtnImage(btnState,
-                        MouseIsOverControl(btnState) ?
-                            StateHover :
-                            StateNormal);
+                    ibtnState.SetImages(StateNormal.ToInt(), StateHover.ToInt());
                 }
                 catch (Exception e)
                 {
@@ -285,41 +285,6 @@ namespace WeightTerminal
             }
         }
 
-        private void BtnClose_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        private void BtnState_MouseEnter(object sender, EventArgs e)
-        {
-            SetBtnImage(btnState, StateHover);
-        }
-
-        private void BtnState_MouseLeave(object sender, EventArgs e)
-        {
-            SetBtnImage(btnState, StateNormal);
-        }
-
-        private void BtnAbout_MouseEnter(object sender, EventArgs e)
-        {
-            SetBtnImage(btnAbout, BtnImage.AboutHover);
-        }
-
-        private void BtnAbout_MouseLeave(object sender, EventArgs e)
-        {
-            SetBtnImage(btnAbout, BtnImage.AboutNormal);
-        }
-
-        private void BtnSettings_MouseEnter(object sender, EventArgs e)
-        {
-            SetBtnImage(btnSettings, BtnImage.SettingsHover);
-        }
-
-        private void BtnSettings_MouseLeave(object sender, EventArgs e)
-        {
-            SetBtnImage(btnSettings, BtnImage.SettingsNormal);
-        }
-
         private void SettingsChanged()
         {
             Weight = 0;
@@ -328,7 +293,7 @@ namespace WeightTerminal
 
             if (AppSettings.Default.ComPortName.IsEmpty())
             {
-                Utils.Log.Error("check settings: comportname empty");
+                AppSettings.Default.ComPortName = "COM1";
             }
 
             if (AppSettings.Default.TerminalType == TerminalType.None)
@@ -338,9 +303,9 @@ namespace WeightTerminal
 
             ScaleTerminal.SerialPort.PortName = AppSettings.Default.ComPortName;
 
-            ScaleTerminal.Type = (TerminalType)AppSettings.Default.TerminalType;
+            ScaleTerminal.Type = AppSettings.Default.TerminalType;
 
-            ScaleTerminal.TerminalMassUnit = (MassUnit)AppSettings.Default.TerminalMassUnit;
+            ScaleTerminal.TerminalMassUnit = AppSettings.Default.TerminalMassUnit;
         }
 
         private void ShowSettings()
@@ -403,6 +368,49 @@ namespace WeightTerminal
                 case KeySettings1:
                 case KeySettings2:
                     ShowSettings();
+                    break;
+            }
+        }
+
+        private void BtnUpdateApp_Click(object sender, EventArgs e)
+        {
+            UpdateApp.Default.Update();
+        }
+
+        private void Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!UpdateApp.Default.CanClose())
+            {
+                if (!Msg.Question(Resources.AppUpdateQuestionInProgress))
+                {
+                    e.Cancel = true;
+
+                    return;
+                }
+            }
+        }
+
+        private void UpdateApp_StatusChanged(object sender, UpdateStatus status)
+        {
+            DebugWrite.Line(status.ToString());
+
+            switch (status)
+            {
+                case UpdateStatus.CheckLatest:
+                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusCheckLatest);
+                    break;
+                case UpdateStatus.Download:
+                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusDownload);
+                    break;
+                case UpdateStatus.ArchiveExtract:
+                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusExtract);
+                    break;
+                case UpdateStatus.Check:
+                case UpdateStatus.CheckLocal:
+                case UpdateStatus.Update:
+                case UpdateStatus.Idle:
+                default:
+                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusIdle);
                     break;
             }
         }

@@ -1,4 +1,4 @@
-﻿namespace WA
+﻿namespace WeightTerminal
 {
     partial class FrmSettings
     {
