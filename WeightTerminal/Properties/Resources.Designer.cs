@@ -126,15 +126,6 @@ namespace WeightTerminal.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Проверить обновления.
-        /// </summary>
-        internal static string AppUpdateInfoStatusIdle {
-            get {
-                return ResourceManager.GetString("AppUpdateInfoStatusIdle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Программа обновлена. Перезапустите для применения обновления..
         /// </summary>
         internal static string AppUpdateInfoUpdated {

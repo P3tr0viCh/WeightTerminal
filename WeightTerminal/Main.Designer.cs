@@ -37,6 +37,7 @@
             this.btnAbout = new System.Windows.Forms.PictureBox();
             this.btnUpdateApp = new System.Windows.Forms.PictureBox();
             this.btnState = new System.Windows.Forms.PictureBox();
+            this.lblStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnAbout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnUpdateApp)).BeginInit();
@@ -49,8 +50,9 @@
             this.lblWeight.Font = new System.Drawing.Font("Segoe UI", 48F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lblWeight.Location = new System.Drawing.Point(0, 0);
             this.lblWeight.Name = "lblWeight";
+            this.lblWeight.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.lblWeight.Size = new System.Drawing.Size(288, 136);
-            this.lblWeight.TabIndex = 3;
+            this.lblWeight.TabIndex = 0;
             this.lblWeight.Text = "999999";
             this.lblWeight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -102,7 +104,7 @@
             this.btnUpdateApp.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.btnUpdateApp.TabIndex = 10;
             this.btnUpdateApp.TabStop = false;
-            this.toolTip.SetToolTip(this.btnUpdateApp, "Проверить обновления");
+            this.toolTip.SetToolTip(this.btnUpdateApp, "Обновление");
             this.btnUpdateApp.Click += new System.EventHandler(this.BtnUpdateApp_Click);
             // 
             // btnState
@@ -115,10 +117,22 @@
             this.btnState.TabStop = false;
             this.btnState.Click += new System.EventHandler(this.BtnState_Click);
             // 
+            // lblStatus
+            // 
+            this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblStatus.Location = new System.Drawing.Point(40, 112);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(208, 23);
+            this.lblStatus.TabIndex = 1;
+            this.lblStatus.Text = "status";
+            this.lblStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
             // Main
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(288, 136);
+            this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.btnUpdateApp);
             this.Controls.Add(this.btnAbout);
             this.Controls.Add(this.btnState);
@@ -153,6 +167,7 @@
         private System.Windows.Forms.PictureBox btnState;
         private System.Windows.Forms.PictureBox btnAbout;
         private System.Windows.Forms.PictureBox btnUpdateApp;
+        private System.Windows.Forms.Label lblStatus;
     }
 }
 

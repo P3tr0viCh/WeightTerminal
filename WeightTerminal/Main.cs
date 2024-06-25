@@ -81,6 +81,8 @@ namespace WeightTerminal
             UpdateApp.Default.StatusChanged += UpdateApp_StatusChanged;
 
             Weight = 0;
+
+            Status = string.Empty;
         }
 
 #if SHOW_RAWDATA
@@ -122,6 +124,14 @@ namespace WeightTerminal
             }
         }
 
+        public string Status
+        {
+            set
+            {
+                lblStatus.Text = value;
+            }
+        }
+
         private void ScaleTerminal_HeadReceived(object sender, HeadEventArgs e)
         {
             switch (ScaleTerminal.Type)
@@ -149,7 +159,12 @@ namespace WeightTerminal
 
         private void ScaleTerminal_WeightReceived(object sender, WeightEventArgs e)
         {
-            DebugWrite.Line($"{e.Weight}");
+#if DEBUG
+            if (ScaleTerminal.IsMultiChannel)
+                DebugWrite.Line($"Channel = {e.Channel}, Weight = {e.Weight}");
+            else
+                DebugWrite.Line($"Weight = {e.Weight}");
+#endif
 
             WeightReceived(e.Weight);
         }
@@ -397,20 +412,20 @@ namespace WeightTerminal
             switch (status)
             {
                 case UpdateStatus.CheckLatest:
-                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusCheckLatest);
+                    Status = Resources.AppUpdateInfoStatusCheckLatest;
                     break;
                 case UpdateStatus.Download:
-                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusDownload);
+                    Status = Resources.AppUpdateInfoStatusDownload;
                     break;
                 case UpdateStatus.ArchiveExtract:
-                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusExtract);
+                    Status = Resources.AppUpdateInfoStatusExtract;
                     break;
                 case UpdateStatus.Check:
                 case UpdateStatus.CheckLocal:
                 case UpdateStatus.Update:
                 case UpdateStatus.Idle:
                 default:
-                    SetToolTip(btnUpdateApp, Resources.AppUpdateInfoStatusIdle);
+                    Status = string.Empty;
                     break;
             }
         }

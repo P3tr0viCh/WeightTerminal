@@ -140,9 +140,6 @@
   <data name="AppUpdateInfoStatusExtract" xml:space="preserve">
     <value>Установка обновления</value>
   </data>
-  <data name="AppUpdateInfoStatusIdle" xml:space="preserve">
-    <value>Проверить обновления</value>
-  </data>
   <data name="AppUpdateInfoUpdated" xml:space="preserve">
     <value>Программа обновлена. Перезапустите для применения обновления.</value>
   </data>
