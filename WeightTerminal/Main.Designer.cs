@@ -53,7 +53,7 @@
             this.lblWeight.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.lblWeight.Size = new System.Drawing.Size(288, 136);
             this.lblWeight.TabIndex = 0;
-            this.lblWeight.Text = "999999";
+            this.lblWeight.Text = "999.999";
             this.lblWeight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnSettings
@@ -138,18 +138,21 @@
             this.Controls.Add(this.btnState);
             this.Controls.Add(this.btnSettings);
             this.Controls.Add(this.lblWeight);
+            this.DoubleBuffered = true;
             this.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(304, 175);
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Weight Terminal";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Main_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Main_FormClosed);
             this.Load += new System.EventHandler(this.Main_Load);
+            this.ResizeEnd += new System.EventHandler(this.Main_ResizeEnd);
+            this.SizeChanged += new System.EventHandler(this.Main_SizeChanged);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Main_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnAbout)).EndInit();

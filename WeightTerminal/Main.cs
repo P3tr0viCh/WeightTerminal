@@ -6,6 +6,7 @@ using P3tr0viCh.AppUpdate;
 using P3tr0viCh.ScaleTerminal;
 using P3tr0viCh.Utils;
 using System;
+using System.Drawing;
 using System.IO.Ports;
 using System.Windows.Forms;
 using WeightTerminal.Properties;
@@ -28,9 +29,6 @@ namespace WeightTerminal
             UpdateAppNormal = 8,
             UpdateAppHover = 9,
         }
-
-        private BtnImage StateNormal = BtnImage.StateOffNormal;
-        private BtnImage StateHover = BtnImage.StateOffHover;
 
         private readonly ScaleTerminal ScaleTerminal = new ScaleTerminal();
 
@@ -64,11 +62,14 @@ namespace WeightTerminal
             ScaleTerminal.HeadReceived += ScaleTerminal_HeadReceived;
             ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
 
+            ScaleTerminal.Opened += ScaleTerminal_Opened;
+            ScaleTerminal.Closed += ScaleTerminal_Closed;
+
             new ImageBtn(btnAbout, imageList, BtnImage.AboutNormal.ToInt(), BtnImage.AboutHover.ToInt());
             new ImageBtn(btnSettings, imageList, BtnImage.SettingsNormal.ToInt(), BtnImage.SettingsHover.ToInt());
             new ImageBtn(btnUpdateApp, imageList, BtnImage.UpdateAppNormal.ToInt(), BtnImage.UpdateAppHover.ToInt());
 
-            ibtnState = new ImageBtn(btnState, imageList, StateNormal.ToInt(), StateHover.ToInt());
+            ibtnState = new ImageBtn(btnState, imageList, BtnImage.StateOffNormal.ToInt(), BtnImage.StateOffHover.ToInt());
 
             SetToolTip(btnAbout, KeyAbout);
             SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
@@ -83,6 +84,64 @@ namespace WeightTerminal
             Weight = 0;
 
             Status = string.Empty;
+        }
+
+        private void Main_FormClosed(object sender, FormClosedEventArgs e)
+        {
+#if SHOW_RAWDATA
+            ScaleTerminal.LineReceived -= ScaleTerminal_LineReceived;
+            ScaleTerminal.ByteReceived -= ScaleTerminal_ByteReceived;
+#endif
+
+            ScaleTerminal.HeadReceived -= ScaleTerminal_HeadReceived;
+            ScaleTerminal.WeightReceived -= ScaleTerminal_WeightReceived;
+
+            ScaleTerminal.Opened -= ScaleTerminal_Opened;
+            ScaleTerminal.Closed -= ScaleTerminal_Closed;
+
+            TerminalState = false;
+
+            AppSettingsSave();
+
+            Utils.Log.Default.WriteProgramStop();
+
+            DebugWrite.Line("Closed", "Main");
+        }
+
+        private void ScaleTerminalOpened()
+        {
+            ibtnState.SetImages(BtnImage.StateOnNormal.ToInt(), BtnImage.StateOnHover.ToInt());
+
+            SetToolTip(btnState, Resources.ToolTipStateClosing, KeyState);
+
+            Utils.Log.Info($"{ScaleTerminal.PortName} opened. Type = {ScaleTerminal.Type}");
+        }
+
+        private void ScaleTerminal_Opened(object sender, EventArgs e)
+        {
+            BeginInvoke((MethodInvoker)delegate
+            {
+                ScaleTerminalOpened();
+            });
+        }
+
+        private void ScaleTerminalClosed()
+        {
+            Weight = 0;
+
+            ibtnState.SetImages(BtnImage.StateOffNormal.ToInt(), BtnImage.StateOffHover.ToInt());
+
+            SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
+
+            Utils.Log.Info($"{ScaleTerminal.PortName} closed");
+        }
+
+        private void ScaleTerminal_Closed(object sender, EventArgs e)
+        {
+            BeginInvoke((MethodInvoker)delegate
+            {
+                ScaleTerminalClosed();
+            });
         }
 
 #if SHOW_RAWDATA
@@ -149,7 +208,7 @@ namespace WeightTerminal
         {
             try
             {
-                Invoke((Action)(() => Weight = weight));
+                BeginInvoke((Action)(() => Weight = weight));
             }
             catch (Exception e)
             {
@@ -167,15 +226,6 @@ namespace WeightTerminal
 #endif
 
             WeightReceived(e.Weight);
-        }
-
-        private void Main_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            TerminalState = false;
-
-            AppSettingsSave();
-
-            Utils.Log.Default.WriteProgramStop();
         }
 
         public void AppSettingsLoad()
@@ -225,15 +275,6 @@ namespace WeightTerminal
             SetToolTip(control, toolTip.GetToolTip(control), keys);
         }
 
-        private void SetToolTip(Control control, string text)
-        {
-            SetToolTip(control, text, Keys.None);
-        }
-
-        private bool MouseIsOverControl(Control control) =>
-            control.ClientRectangle.Contains(
-                control.PointToClient(Cursor.Position));
-
         public bool TerminalState
         {
             get
@@ -263,13 +304,6 @@ namespace WeightTerminal
                             }
 
                             ScaleTerminal.Open();
-
-                            StateNormal = BtnImage.StateOnNormal;
-                            StateHover = BtnImage.StateOnHover;
-
-                            SetToolTip(btnState, Resources.ToolTipStateClosing, KeyState);
-
-                            Utils.Log.Info($"{ScaleTerminal.PortName} opened. type={ScaleTerminal.Type}");
                         }
                     }
                     else
@@ -277,19 +311,8 @@ namespace WeightTerminal
                         if (ScaleTerminal.IsOpen)
                         {
                             ScaleTerminal.Close();
-
-                            Invoke((Action)(() => Weight = 0));
-
-                            StateNormal = BtnImage.StateOffNormal;
-                            StateHover = BtnImage.StateOffHover;
-
-                            SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
-
-                            Utils.Log.Info($"{ScaleTerminal.PortName} closed");
                         }
                     }
-
-                    ibtnState.SetImages(StateNormal.ToInt(), StateHover.ToInt());
                 }
                 catch (Exception e)
                 {
@@ -428,6 +451,37 @@ namespace WeightTerminal
                     Status = string.Empty;
                     break;
             }
+        }
+
+        const string measureString = "999.999";
+
+        private void UpdateWeightFontSize()
+        {
+            var fontSize = 48;
+
+            Size stringSize;
+
+            var font = lblWeight.Font;
+
+            do
+            {
+                font = new Font(font.FontFamily, fontSize);
+
+                stringSize = TextRenderer.MeasureText(measureString, font);
+
+                fontSize++;
+            } while (stringSize.Width < ClientSize.Width - 27 && stringSize.Height < ClientSize.Height - 50);
+
+            lblWeight.Font = font;
+        }
+
+        private void Main_SizeChanged(object sender, EventArgs e)
+        {
+            UpdateWeightFontSize();
+        }
+
+        private void Main_ResizeEnd(object sender, EventArgs e)
+        {
         }
     }
 }
