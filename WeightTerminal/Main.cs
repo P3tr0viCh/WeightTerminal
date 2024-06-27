@@ -2,15 +2,18 @@
 //#define SHOW_RAWDATA
 #endif
 
+using Newtonsoft.Json.Linq;
 using P3tr0viCh.AppUpdate;
 using P3tr0viCh.ScaleTerminal;
 using P3tr0viCh.Utils;
 using System;
 using System.Drawing;
 using System.IO.Ports;
+using System.Linq;
 using System.Windows.Forms;
 using WeightTerminal.Properties;
 using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
+using static WeightTerminal.Enums;
 
 namespace WeightTerminal
 {
@@ -28,6 +31,8 @@ namespace WeightTerminal
             AboutHover = 7,
             UpdateAppNormal = 8,
             UpdateAppHover = 9,
+            ChannelsNormal = 10,
+            ChannelsHover = 11,
         }
 
         private readonly ScaleTerminal ScaleTerminal = new ScaleTerminal();
@@ -59,6 +64,17 @@ namespace WeightTerminal
             ScaleTerminal.ByteReceived += ScaleTerminal_ByteReceived;
 #endif
 
+#if DEBUG
+            lblChannelLeftFar.Click += LblChannelLeftFar_Click;
+            lblChannelRightFar.Click += LblChannelRightFar_Click;
+            lblChannelLeftNear.Click += LblChannelLeftNear_Click;
+            lblChannelRightNear.Click += LblChannelRightNear_Click;
+#endif
+            lblDiffFar.ForeColor = ControlPaint.Light(lblDiffFar.ForeColor);
+            lblDiffNear.ForeColor = ControlPaint.Light(lblDiffNear.ForeColor);
+            lblDiffLeft.ForeColor = ControlPaint.Light(lblDiffLeft.ForeColor);
+            lblDiffRight.ForeColor = ControlPaint.Light(lblDiffRight.ForeColor);
+
             ScaleTerminal.HeadReceived += ScaleTerminal_HeadReceived;
             ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
 
@@ -68,12 +84,14 @@ namespace WeightTerminal
             new ImageBtn(btnAbout, imageList, BtnImage.AboutNormal.ToInt(), BtnImage.AboutHover.ToInt());
             new ImageBtn(btnSettings, imageList, BtnImage.SettingsNormal.ToInt(), BtnImage.SettingsHover.ToInt());
             new ImageBtn(btnUpdateApp, imageList, BtnImage.UpdateAppNormal.ToInt(), BtnImage.UpdateAppHover.ToInt());
+            new ImageBtn(btnChannels, imageList, BtnImage.ChannelsNormal.ToInt(), BtnImage.ChannelsHover.ToInt());
 
             ibtnState = new ImageBtn(btnState, imageList, BtnImage.StateOffNormal.ToInt(), BtnImage.StateOffHover.ToInt());
 
-            SetToolTip(btnAbout, KeyAbout);
-            SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
-            SetToolTip(btnSettings, KeySettings1);
+            SetToolTip(btnAbout, Key.About);
+            SetToolTip(btnState, Resources.ToolTipStateOpening, Key.State);
+            SetToolTip(btnChannels, Key.Channels);
+            SetToolTip(btnSettings, Key.Settings1);
 
             AppSettingsLoad();
 
@@ -81,7 +99,7 @@ namespace WeightTerminal
 
             UpdateApp.Default.StatusChanged += UpdateApp_StatusChanged;
 
-            Weight = 0;
+            WeightClear();
 
             Status = string.Empty;
         }
@@ -112,7 +130,7 @@ namespace WeightTerminal
         {
             ibtnState.SetImages(BtnImage.StateOnNormal.ToInt(), BtnImage.StateOnHover.ToInt());
 
-            SetToolTip(btnState, Resources.ToolTipStateClosing, KeyState);
+            SetToolTip(btnState, Resources.ToolTipStateClosing, Key.State);
 
             Utils.Log.Info($"{ScaleTerminal.PortName} opened. Type = {ScaleTerminal.Type}");
         }
@@ -127,11 +145,11 @@ namespace WeightTerminal
 
         private void ScaleTerminalClosed()
         {
-            Weight = 0;
+            WeightClear();
 
             ibtnState.SetImages(BtnImage.StateOffNormal.ToInt(), BtnImage.StateOffHover.ToInt());
 
-            SetToolTip(btnState, Resources.ToolTipStateOpening, KeyState);
+            SetToolTip(btnState, Resources.ToolTipStateOpening, Key.State);
 
             Utils.Log.Info($"{ScaleTerminal.PortName} closed");
         }
@@ -158,6 +176,21 @@ namespace WeightTerminal
         }
 #endif
 
+        private void WeightClear()
+        {
+            Weight = 0;
+
+            SetChannel(Channel.LeftFar, 0);
+            SetChannel(Channel.RightFar, 0);
+            SetChannel(Channel.LeftNear, 0);
+            SetChannel(Channel.RightNear, 0);
+        }
+
+        private string WeightToStr(int value)
+        {
+            return Utils.WeightToStr(value, AppSettings.Default.OutputMassUnit);
+        }
+
         private int weight = 0;
         public int Weight
         {
@@ -169,17 +202,7 @@ namespace WeightTerminal
             {
                 weight = value;
 
-                switch (AppSettings.Default.OutputMassUnit)
-                {
-                    case MassUnit.tn:
-                        lblWeight.Text = (weight / 1000.0).ToString("0.000");
-
-                        break;
-                    default:
-                        lblWeight.Text = weight.ToString();
-
-                        break;
-                }
+                lblWeight.Text = WeightToStr(value);
             }
         }
 
@@ -204,11 +227,37 @@ namespace WeightTerminal
             }
         }
 
-        private void WeightReceived(int weight)
+        private Channel ChannelFromTerminal(int channel)
+        {
+            switch (channel)
+            {
+                default:
+                    return Channel.LeftFar;
+                case 1:
+                    return Channel.RightFar;
+                case 2:
+                    return Channel.LeftNear;
+                case 3:
+                    return Channel.RightNear;
+            }
+        }
+
+        private void DoWeightReceived(WeightEventArgs weightEvent)
         {
             try
             {
-                BeginInvoke((Action)(() => Weight = weight));
+                BeginInvoke((MethodInvoker)delegate
+                {
+                    Weight = weightEvent.Weight;
+
+                    if (ChannelsVisible)
+                    {
+                        for (var channel = 0; channel < ScaleTerminal.ChannelCount; channel++)
+                        {
+                            SetChannel(ChannelFromTerminal(channel), weightEvent.Channels[channel]);
+                        }
+                    }
+                });
             }
             catch (Exception e)
             {
@@ -218,14 +267,16 @@ namespace WeightTerminal
 
         private void ScaleTerminal_WeightReceived(object sender, WeightEventArgs e)
         {
-#if DEBUG
             if (ScaleTerminal.IsMultiChannel)
-                DebugWrite.Line($"Channel = {e.Channel}, Weight = {e.Weight}");
+            {
+                DebugWrite.Line($"Weight = {e.Weight}, Channels = {string.Join(", ", e.Channels)}");
+            }
             else
+            {
                 DebugWrite.Line($"Weight = {e.Weight}");
-#endif
+            }
 
-            WeightReceived(e.Weight);
+            DoWeightReceived(e);
         }
 
         public void AppSettingsLoad()
@@ -260,19 +311,19 @@ namespace WeightTerminal
             }
         }
 
-        private void SetToolTip(Control control, string text, Keys keys)
+        private void SetToolTip(Control control, string text, Key key)
         {
-            if (keys != Keys.None)
+            if (key != Key.None)
             {
-                text = string.Format(Resources.ToolTipKey, text, keys);
+                text = string.Format(Resources.ToolTipKey, text, (Keys)key);
             }
 
             toolTip.SetToolTip(control, text);
         }
 
-        private void SetToolTip(Control control, Keys keys)
+        private void SetToolTip(Control control, Key key)
         {
-            SetToolTip(control, toolTip.GetToolTip(control), keys);
+            SetToolTip(control, toolTip.GetToolTip(control), key);
         }
 
         public bool TerminalState
@@ -325,7 +376,7 @@ namespace WeightTerminal
 
         private void SettingsChanged()
         {
-            Weight = 0;
+            WeightClear();
 
             btnState.Enabled = CheckComPortsExists();
 
@@ -344,6 +395,10 @@ namespace WeightTerminal
             ScaleTerminal.Type = AppSettings.Default.TerminalType;
 
             ScaleTerminal.TerminalMassUnit = AppSettings.Default.TerminalMassUnit;
+
+            btnChannels.Visible = ScaleTerminal.IsMultiChannel && AppSettings.Default.ChannelCount != ChannelCount.One;
+
+            ChannelsVisible = btnChannels.Visible;
         }
 
         private void ShowSettings()
@@ -388,23 +443,21 @@ namespace WeightTerminal
             ShowAbout();
         }
 
-        private const Keys KeyAbout = Keys.F1;
-        private const Keys KeyState = Keys.F4;
-        private const Keys KeySettings1 = Keys.F8;
-        private const Keys KeySettings2 = Keys.O | Keys.Control;
-
         private void Main_KeyUp(object sender, KeyEventArgs e)
         {
-            switch (e.KeyData)
+            switch ((Key)e.KeyData)
             {
-                case KeyAbout:
+                case Key.About:
                     ShowAbout();
                     break;
-                case KeyState:
+                case Key.State:
                     TerminalState = !TerminalState;
                     break;
-                case KeySettings1:
-                case KeySettings2:
+                case Key.Channels:
+                    ChannelsVisible = !ChannelsVisible;
+                    break;
+                case Key.Settings1:
+                case Key.Settings2:
                     ShowSettings();
                     break;
             }
@@ -453,35 +506,164 @@ namespace WeightTerminal
             }
         }
 
-        const string measureString = "999.999";
-
-        private void UpdateWeightFontSize()
+        private bool channels = false;
+        public bool ChannelsVisible
         {
-            var fontSize = 48;
-
-            Size stringSize;
-
-            var font = lblWeight.Font;
-
-            do
+            get { return channels; }
+            set
             {
-                font = new Font(font.FontFamily, fontSize);
+                channels = value;
 
-                stringSize = TextRenderer.MeasureText(measureString, font);
-
-                fontSize++;
-            } while (stringSize.Width < ClientSize.Width - 27 && stringSize.Height < ClientSize.Height - 50);
-
-            lblWeight.Font = font;
+                ShowChannels(channels);
+            }
         }
 
-        private void Main_SizeChanged(object sender, EventArgs e)
+        private void ShowChannels(bool visible)
         {
-            UpdateWeightFontSize();
+            SuspendLayout();
+
+            if (AppSettings.Default.ChannelCount == ChannelCount.One)
+            {
+                visible = false;
+            }
+
+            lblChannelLeftFar.Visible = visible;
+            lblChannelRightFar.Visible = visible && AppSettings.Default.ChannelCount != ChannelCount.TwoVertical;
+            lblChannelLeftNear.Visible = visible && AppSettings.Default.ChannelCount != ChannelCount.TwoHorizontal;
+            lblChannelRightNear.Visible = visible && AppSettings.Default.ChannelCount == ChannelCount.Four;
+
+            lblDiffFar.Visible = lblChannelRightFar.Visible;
+            lblDiffNear.Visible = lblChannelLeftNear.Visible && lblChannelRightNear.Visible;
+            lblDiffLeft.Visible = lblChannelLeftNear.Visible;
+            lblDiffRight.Visible = lblChannelRightNear.Visible;
+
+            if (visible)
+            {
+                btnChannels.Left = 200;
+
+                SetBounds(Left, Top, 456, 271);
+            }
+            else
+            {
+                btnChannels.Left = 124;
+
+                SetBounds(Left, Top, 304, 175);
+            }
+
+            lblWeight.SetBounds((ClientSize.Width - lblWeight.Width) / 2,
+                                (ClientSize.Height - lblWeight.Height) / 2,
+                                lblWeight.Width, lblWeight.Height);
+
+            ResumeLayout();
         }
 
-        private void Main_ResizeEnd(object sender, EventArgs e)
+        private void BtnChannels_Click(object sender, EventArgs e)
         {
+            ChannelsVisible = !ChannelsVisible;
         }
+
+        private readonly int[] channelWeight = new int[4] { int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue };
+
+        private Label GetChannelLabel(Channel channel)
+        {
+            switch (channel)
+            {
+                case Channel.RightFar:
+                    return lblChannelRightFar;
+                case Channel.LeftNear:
+                    return lblChannelLeftNear;
+                case Channel.RightNear:
+                    return lblChannelRightNear;
+                default:
+                    return lblChannelLeftFar;
+            }
+        }
+
+        private void UpdateDiffs(Channel channel)
+        {
+            int diffLR;
+            int diffFN;
+
+            switch (channel)
+            {
+                case Channel.LeftFar:
+                    diffLR = GetChannel(channel) - GetChannel(Channel.RightFar);
+                    diffFN = GetChannel(channel) - GetChannel(Channel.LeftNear);
+
+                    lblDiffFar.Text = WeightToStr(Math.Abs(diffLR));
+                    lblDiffLeft.Text = WeightToStr(Math.Abs(diffFN));
+
+                    break;
+                case Channel.RightFar:
+                    diffLR = GetChannel(Channel.LeftFar) - GetChannel(channel);
+                    diffFN = GetChannel(channel) - GetChannel(Channel.RightNear);
+
+                    lblDiffFar.Text = WeightToStr(Math.Abs(diffLR));
+                    lblDiffRight.Text = WeightToStr(Math.Abs(diffFN));
+
+                    break;
+                case Channel.LeftNear:
+                    diffLR = GetChannel(channel) - GetChannel(Channel.RightNear);
+                    diffFN = GetChannel(Channel.LeftFar) - GetChannel(channel);
+
+                    lblDiffNear.Text = WeightToStr(Math.Abs(diffLR));
+                    lblDiffLeft.Text = WeightToStr(Math.Abs(diffFN));
+
+                    break;
+                case Channel.RightNear:
+                    diffLR = GetChannel(Channel.LeftNear) - GetChannel(channel);
+                    diffFN = GetChannel(Channel.RightFar) - GetChannel(channel);
+
+                    lblDiffNear.Text = WeightToStr(Math.Abs(diffLR));
+                    lblDiffRight.Text = WeightToStr(Math.Abs(diffFN));
+
+                    break;
+            }
+        }
+
+        private void SetChannel(Channel channel, int value)
+        {
+            if (channelWeight[(int)channel] == value) return;
+
+            channelWeight[(int)channel] = value;
+
+            GetChannelLabel(channel).Text = WeightToStr(value);
+
+            UpdateDiffs(channel);
+        }
+
+        private int GetChannel(Channel channel)
+        {
+            return channelWeight[(int)channel];
+        }
+
+#if DEBUG
+        readonly Random random = new Random();
+
+        int GetRandomWeight()
+        {
+            return 1000 - random.Next(2000);
+        }
+
+        private void LblChannelLeftFar_Click(object sender, EventArgs e)
+        {
+            SetChannel(Channel.LeftFar, GetRandomWeight());
+        }
+
+        private void LblChannelRightFar_Click(object sender, EventArgs e)
+        {
+            SetChannel(Channel.RightFar, GetRandomWeight());
+        }
+
+        private void LblChannelLeftNear_Click(object sender, EventArgs e)
+        {
+            SetChannel(Channel.LeftNear, GetRandomWeight());
+        }
+
+        private void LblChannelRightNear_Click(object sender, EventArgs e)
+        {
+            SetChannel(Channel.RightNear, GetRandomWeight());
+        }
+#endif
     }
 }

@@ -10,13 +10,7 @@ namespace WeightTerminal
         {
             private static readonly P3tr0viCh.Utils.Log defaultInstance = new P3tr0viCh.Utils.Log();
 
-            public static P3tr0viCh.Utils.Log Default
-            {
-                get
-                {
-                    return defaultInstance;
-                }
-            }
+            public static P3tr0viCh.Utils.Log Default => defaultInstance;
 
             public static void Info(string s, [CallerMemberName] string memberName = "")
             {
