@@ -194,7 +194,7 @@
             this.lblDiffFar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblDiffFar.Font = new System.Drawing.Font("Segoe UI", 16F);
-            this.lblDiffFar.Location = new System.Drawing.Point(148, 44);
+            this.lblDiffFar.Location = new System.Drawing.Point(148, 37);
             this.lblDiffFar.Margin = new System.Windows.Forms.Padding(18, 0, 18, 0);
             this.lblDiffFar.Name = "lblDiffFar";
             this.lblDiffFar.Size = new System.Drawing.Size(232, 32);
