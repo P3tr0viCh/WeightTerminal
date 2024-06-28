@@ -23,13 +23,13 @@ namespace WeightTerminal
         [Category("Весовой терминал")]
         [DisplayName("Единицы измерения")]
         [Description("Единицы измерения терминала")]
-        public MassUnit TerminalMassUnit { get; set; } = MassUnit.kg;
+        public MassUnit TerminalMassUnit { get; set; } = MassUnit.tn;
 
         // ------------------------------------------------------------------------------------------------------------
         [Category("Формат")]
         [DisplayName("Единицы измерения")]
         [Description("Единицы измерения в окне программы")]
-        public MassUnit OutputMassUnit { get; set; } = MassUnit.kg;
+        public MassUnit OutputMassUnit { get; set; } = MassUnit.tn;
 
         // ------------------------------------------------------------------------------------------------------------
         [Category("Каналы")]

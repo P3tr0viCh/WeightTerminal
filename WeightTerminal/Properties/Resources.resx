@@ -146,6 +146,9 @@
   <data name="AppUpdateQuestionInProgress" xml:space="preserve">
     <value>Происходит процесс обновления. Прервать?</value>
   </data>
+  <data name="ErrorCheckChannels" xml:space="preserve">
+    <value>Ошибка в каналах: имеются повторяющиеся значения.</value>
+  </data>
   <data name="ErrorError" xml:space="preserve">
     <value>Ошибка:
 {0}</value>

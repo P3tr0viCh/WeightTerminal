@@ -2,14 +2,11 @@
 //#define SHOW_RAWDATA
 #endif
 
-using Newtonsoft.Json.Linq;
 using P3tr0viCh.AppUpdate;
 using P3tr0viCh.ScaleTerminal;
 using P3tr0viCh.Utils;
 using System;
-using System.Drawing;
 using System.IO.Ports;
-using System.Linq;
 using System.Windows.Forms;
 using WeightTerminal.Properties;
 using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
@@ -19,22 +16,6 @@ namespace WeightTerminal
 {
     public partial class Main : Form
     {
-        private enum BtnImage
-        {
-            SettingsNormal = 0,
-            SettingsHover = 1,
-            StateOnNormal = 2,
-            StateOnHover = 3,
-            StateOffNormal = 4,
-            StateOffHover = 5,
-            AboutNormal = 6,
-            AboutHover = 7,
-            UpdateAppNormal = 8,
-            UpdateAppHover = 9,
-            ChannelsNormal = 10,
-            ChannelsHover = 11,
-        }
-
         private readonly ScaleTerminal ScaleTerminal = new ScaleTerminal();
 
         private ImageBtn ibtnState;
@@ -81,6 +62,8 @@ namespace WeightTerminal
             ScaleTerminal.Opened += ScaleTerminal_Opened;
             ScaleTerminal.Closed += ScaleTerminal_Closed;
 
+            UpdateApp.Default.StatusChanged += UpdateApp_StatusChanged;
+
             new ImageBtn(btnAbout, imageList, BtnImage.AboutNormal.ToInt(), BtnImage.AboutHover.ToInt());
             new ImageBtn(btnSettings, imageList, BtnImage.SettingsNormal.ToInt(), BtnImage.SettingsHover.ToInt());
             new ImageBtn(btnUpdateApp, imageList, BtnImage.UpdateAppNormal.ToInt(), BtnImage.UpdateAppHover.ToInt());
@@ -93,15 +76,11 @@ namespace WeightTerminal
             SetToolTip(btnChannels, Key.Channels);
             SetToolTip(btnSettings, Key.Settings1);
 
+            Status = string.Empty;
+
             AppSettingsLoad();
 
             SettingsChanged();
-
-            UpdateApp.Default.StatusChanged += UpdateApp_StatusChanged;
-
-            WeightClear();
-
-            Status = string.Empty;
         }
 
         private void Main_FormClosed(object sender, FormClosedEventArgs e)
@@ -178,6 +157,13 @@ namespace WeightTerminal
 
         private void WeightClear()
         {
+            weight = int.MaxValue;
+
+            channelWeight[0] = int.MaxValue;
+            channelWeight[1] = int.MaxValue;
+            channelWeight[2] = int.MaxValue;
+            channelWeight[3] = int.MaxValue;
+
             Weight = 0;
 
             SetChannel(Channel.LeftFar, 0);
@@ -200,6 +186,8 @@ namespace WeightTerminal
             }
             set
             {
+                if (weight == value) return;
+
                 weight = value;
 
                 lblWeight.Text = WeightToStr(value);
@@ -232,13 +220,13 @@ namespace WeightTerminal
             switch (channel)
             {
                 default:
-                    return Channel.LeftFar;
+                    return AppSettings.Default.Channel1;
                 case 1:
-                    return Channel.RightFar;
+                    return AppSettings.Default.Channel2;
                 case 2:
-                    return Channel.LeftNear;
+                    return AppSettings.Default.Channel3;
                 case 3:
-                    return Channel.RightNear;
+                    return AppSettings.Default.Channel4;
             }
         }
 
@@ -376,8 +364,6 @@ namespace WeightTerminal
 
         private void SettingsChanged()
         {
-            WeightClear();
-
             btnState.Enabled = CheckComPortsExists();
 
             if (AppSettings.Default.ComPortName.IsEmpty())
@@ -399,6 +385,8 @@ namespace WeightTerminal
             btnChannels.Visible = ScaleTerminal.IsMultiChannel && AppSettings.Default.ChannelCount != ChannelCount.One;
 
             ChannelsVisible = btnChannels.Visible;
+
+            WeightClear();
         }
 
         private void ShowSettings()
@@ -539,16 +527,14 @@ namespace WeightTerminal
 
             if (visible)
             {
-                btnChannels.Left = 200;
-
-                SetBounds(Left, Top, 456, 271);
+                SetBounds(Left, Top, 544, 271);
             }
             else
             {
-                btnChannels.Left = 124;
-
                 SetBounds(Left, Top, 304, 175);
             }
+
+            btnChannels.Left = (ClientSize.Width - btnChannels.Width) / 2;
 
             lblWeight.SetBounds((ClientSize.Width - lblWeight.Width) / 2,
                                 (ClientSize.Height - lblWeight.Height) / 2,

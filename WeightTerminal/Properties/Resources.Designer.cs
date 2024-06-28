@@ -144,6 +144,15 @@ namespace WeightTerminal.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ошибка в каналах: имеются повторяющиеся значения..
+        /// </summary>
+        internal static string ErrorCheckChannels {
+            get {
+                return ResourceManager.GetString("ErrorCheckChannels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ошибка:
         ///{0}.
         /// </summary>

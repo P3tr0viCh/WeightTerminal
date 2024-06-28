@@ -6,7 +6,23 @@ namespace WeightTerminal
 {
     public class Enums
     {
-        public enum Key
+        internal enum BtnImage
+        {
+            SettingsNormal = 0,
+            SettingsHover = 1,
+            StateOnNormal = 2,
+            StateOnHover = 3,
+            StateOffNormal = 4,
+            StateOffHover = 5,
+            AboutNormal = 6,
+            AboutHover = 7,
+            UpdateAppNormal = 8,
+            UpdateAppHover = 9,
+            ChannelsNormal = 10,
+            ChannelsHover = 11,
+        }
+
+        internal enum Key
         {
             None = Keys.None,
             About = Keys.F1,
