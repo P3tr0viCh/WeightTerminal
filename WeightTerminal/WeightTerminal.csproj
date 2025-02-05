@@ -37,9 +37,6 @@
     <ApplicationIcon>WeightTerminal.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="P3tr0viCh.AppUpdate">
       <HintPath>..\..\..\..\Projects.exe\P3tr0viCh.AppUpdate\Release\P3tr0viCh.AppUpdate.dll</HintPath>
     </Reference>
@@ -107,7 +104,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.ScaleTerminal.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
