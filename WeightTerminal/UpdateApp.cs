@@ -8,14 +8,11 @@ using WeightTerminal.Properties;
 
 namespace WeightTerminal
 {
-    internal class UpdateApp
+    internal class UpdateApp: DefaultInstance<UpdateApp>
     {
         private const string GitHubOwner = "P3tr0viCh";
         private const string GitHubRepo = "WeightTerminal";
         private const string GitHubArchiveFile = "latest.zip";
-
-        private static readonly UpdateApp instance = new UpdateApp();
-        public static UpdateApp Default => instance;
 
         public event ProgramStatus<UpdateStatus>.StatusChangedEventHandler StatusChanged;
 
@@ -28,7 +25,7 @@ namespace WeightTerminal
                 return true;
             }
 
-            return AppUpdate.Status.IsIdle();
+            return AppUpdate.Status.IsIdle;
         }
 
         public async void Update()

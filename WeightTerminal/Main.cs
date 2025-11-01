@@ -24,7 +24,7 @@ namespace WeightTerminal
         {
             InitializeComponent();
 
-            Utils.Log.Default.WriteProgramStart();
+            Utils.Log.WriteProgramStart();
 
             AppSettings.Directory = Files.ExecutableDirectory();
 
@@ -64,12 +64,12 @@ namespace WeightTerminal
 
             UpdateApp.Default.StatusChanged += UpdateApp_StatusChanged;
 
-            new ImageBtn(btnAbout, imageList, BtnImage.AboutNormal.ToInt(), BtnImage.AboutHover.ToInt());
-            new ImageBtn(btnSettings, imageList, BtnImage.SettingsNormal.ToInt(), BtnImage.SettingsHover.ToInt());
-            new ImageBtn(btnUpdateApp, imageList, BtnImage.UpdateAppNormal.ToInt(), BtnImage.UpdateAppHover.ToInt());
-            new ImageBtn(btnChannels, imageList, BtnImage.ChannelsNormal.ToInt(), BtnImage.ChannelsHover.ToInt());
+            new ImageBtn(btnAbout, imageList, (int)BtnImage.AboutNormal, (int)BtnImage.AboutHover);
+            new ImageBtn(btnSettings, imageList, (int)BtnImage.SettingsNormal, (int)BtnImage.SettingsHover);
+            new ImageBtn(btnUpdateApp, imageList, (int)BtnImage.UpdateAppNormal, (int)BtnImage.UpdateAppHover);
+            new ImageBtn(btnChannels, imageList, (int)BtnImage.ChannelsNormal, (int)BtnImage.ChannelsHover);
 
-            ibtnState = new ImageBtn(btnState, imageList, BtnImage.StateOffNormal.ToInt(), BtnImage.StateOffHover.ToInt());
+            ibtnState = new ImageBtn(btnState, imageList, (int)BtnImage.StateOffNormal, (int)BtnImage.StateOffHover);
 
             SetToolTip(btnAbout, Key.About);
             SetToolTip(btnState, Resources.ToolTipStateOpening, Key.State);
@@ -100,14 +100,14 @@ namespace WeightTerminal
 
             AppSettingsSave();
 
-            Utils.Log.Default.WriteProgramStop();
+            Utils.Log.WriteProgramStop();
 
             DebugWrite.Line("Closed", "Main");
         }
 
         private void ScaleTerminalOpened()
         {
-            ibtnState.SetImages(BtnImage.StateOnNormal.ToInt(), BtnImage.StateOnHover.ToInt());
+            ibtnState.SetImages((int)BtnImage.StateOnNormal, (int)BtnImage.StateOnHover);
 
             SetToolTip(btnState, Resources.ToolTipStateClosing, Key.State);
 
@@ -126,7 +126,7 @@ namespace WeightTerminal
         {
             WeightClear();
 
-            ibtnState.SetImages(BtnImage.StateOffNormal.ToInt(), BtnImage.StateOffHover.ToInt());
+            ibtnState.SetImages((int)BtnImage.StateOffNormal, (int)BtnImage.StateOffHover);
 
             SetToolTip(btnState, Resources.ToolTipStateOpening, Key.State);
 
@@ -180,10 +180,7 @@ namespace WeightTerminal
         private int weight = 0;
         public int Weight
         {
-            get
-            {
-                return weight;
-            }
+            get => weight;
             set
             {
                 if (weight == value) return;
@@ -196,10 +193,7 @@ namespace WeightTerminal
 
         public string Status
         {
-            set
-            {
-                lblStatus.Text = value;
-            }
+            set => lblStatus.Text = value;
         }
 
         private void ScaleTerminal_HeadReceived(object sender, HeadEventArgs e)
@@ -316,10 +310,7 @@ namespace WeightTerminal
 
         public bool TerminalState
         {
-            get
-            {
-                return ScaleTerminal.IsOpen;
-            }
+            get => ScaleTerminal.IsOpen;
             set
             {
                 try
@@ -422,7 +413,7 @@ namespace WeightTerminal
             FrmAbout.Show(new FrmAbout.Options()
             {
                 Link = Resources.GitHubLink,
-                AppNameFontSize = 24
+                AppNameFontSize = 22
             });
         }
 
@@ -497,7 +488,7 @@ namespace WeightTerminal
         private bool channels = false;
         public bool ChannelsVisible
         {
-            get { return channels; }
+            get => channels;
             set
             {
                 channels = value;

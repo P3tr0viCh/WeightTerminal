@@ -16,7 +16,7 @@ namespace WeightTerminal
         {
             using (var frm = new FrmSettings())
             {
-                Utils.Log.Default.WriteFormOpen(frm);
+                Utils.Log.WriteFormOpen(frm);
 
                 try
                 {
@@ -37,7 +37,7 @@ namespace WeightTerminal
                 }
                 finally
                 {
-                    Utils.Log.Default.WriteFormClose(frm);
+                    Utils.Log.WriteFormClose(frm);
                 }
             }
         }
@@ -91,7 +91,6 @@ namespace WeightTerminal
             {
                 DialogResult = DialogResult.OK;
             }
-
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using P3tr0viCh.Utils;
 using System.ComponentModel;
-using WeightTerminal.Properties;
 using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
 using static P3tr0viCh.Utils.Converters;
 using static WeightTerminal.Enums;

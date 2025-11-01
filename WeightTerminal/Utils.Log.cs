@@ -1,6 +1,7 @@
 ﻿using P3tr0viCh.Utils;
 using System;
 using System.Runtime.CompilerServices;
+using System.Windows.Forms;
 
 namespace WeightTerminal
 {
@@ -8,17 +9,23 @@ namespace WeightTerminal
     {
         public static class Log
         {
-            private static readonly P3tr0viCh.Utils.Log defaultInstance = new P3tr0viCh.Utils.Log();
+            private class InternalLog : DefaultInstance<P3tr0viCh.Utils.Log> { }
 
-            public static P3tr0viCh.Utils.Log Default => defaultInstance;
+            public static void WriteProgramStart() => InternalLog.Default.WriteProgramStart();
+
+            public static void WriteProgramStop() => InternalLog.Default.WriteProgramStop();
+
+            public static void WriteFormOpen(Form frm) => InternalLog.Default.WriteFormOpen(frm);
+
+            public static void WriteFormClose(Form frm) => InternalLog.Default.WriteFormClose(frm);
 
             public static void Info(string s, [CallerMemberName] string memberName = "")
             {
-                var text = string.Format("{0}: {1}", memberName, s);
+                s = s.ReplaceEol();
 
                 DebugWrite.Line(s, memberName);
 
-                Default.Write(text);
+                InternalLog.Default.Write($"{memberName}: {s}");
             }
 
             public static void Error(Exception e, [CallerMemberName] string memberName = "")
@@ -32,11 +39,11 @@ namespace WeightTerminal
 
             public static void Error(string err, [CallerMemberName] string memberName = "")
             {
-                var error = string.Format("{0} fail: {1}", memberName, err);
+                err = err.ReplaceEol();
 
                 DebugWrite.Error(err, memberName);
 
-                Default.Write(error);
+                InternalLog.Default.Write($"{memberName} fail: {err}");
             }
         }
     }
