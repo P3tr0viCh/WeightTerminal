@@ -79,6 +79,15 @@ namespace WeightTerminal.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to HBM WE2110: HBM стандартный формат.
+        /// </summary>
+        internal static string TerminalType_HbmWe2110_Description {
+            get {
+                return ResourceManager.GetString("TerminalType.HbmWe2110.Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Микросим М0601.
         /// </summary>
         internal static string TerminalType_MicrosimM0601_Description {

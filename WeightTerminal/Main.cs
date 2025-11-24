@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-//#define SHOW_RAWDATA
+#define _SHOW_RAWDATA
 #endif
 
 using P3tr0viCh.AppUpdate;
@@ -7,6 +7,7 @@ using P3tr0viCh.ScaleTerminal;
 using P3tr0viCh.Utils;
 using System;
 using System.IO.Ports;
+using System.Linq;
 using System.Windows.Forms;
 using WeightTerminal.Properties;
 using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
@@ -149,7 +150,7 @@ namespace WeightTerminal
 
         private void ScaleTerminal_ByteReceived(object sender, ByteEventArgs e)
         {
-            var bits = new BitArray(new byte[] { e.B });
+            var bits = new System.Collections.BitArray(new byte[] { e.B });
 
             DebugWrite.Line(string.Join("", bits.Cast<bool>().Reverse().Select(bit => bit ? '1' : '0')));
         }
@@ -249,6 +250,7 @@ namespace WeightTerminal
 
         private void ScaleTerminal_WeightReceived(object sender, WeightEventArgs e)
         {
+#if DEBUG
             if (ScaleTerminal.IsMultiChannel)
             {
                 DebugWrite.Line($"Weight = {e.Weight}, Channels = {string.Join(", ", e.Channels)}");
@@ -257,6 +259,7 @@ namespace WeightTerminal
             {
                 DebugWrite.Line($"Weight = {e.Weight}");
             }
+#endif
 
             DoWeightReceived(e);
         }
