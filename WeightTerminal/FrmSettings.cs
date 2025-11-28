@@ -47,32 +47,28 @@ namespace WeightTerminal
             propertyGrid.SelectedObject = AppSettings.Default;
         }
 
-        private bool CheckChannels()
+        private void AssertChannels()
         {
             if (AppSettings.Default.Channel1 == AppSettings.Default.Channel2 ||
                 AppSettings.Default.Channel1 == AppSettings.Default.Channel3 ||
-                AppSettings.Default.Channel1 == AppSettings.Default.Channel4)
+                AppSettings.Default.Channel1 == AppSettings.Default.Channel4 ||
+                AppSettings.Default.Channel2 == AppSettings.Default.Channel3 ||
+                AppSettings.Default.Channel2 == AppSettings.Default.Channel4 ||
+                AppSettings.Default.Channel3 == AppSettings.Default.Channel4)
             {
-                return false;
+                throw new Exception(Resources.ErrorCheckChannels);
             }
-            if (AppSettings.Default.Channel2 == AppSettings.Default.Channel3 ||
-                AppSettings.Default.Channel2 == AppSettings.Default.Channel4)
-            {
-                return false;
-            }
-            if (AppSettings.Default.Channel3 == AppSettings.Default.Channel4)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private bool CheckData()
         {
-            if (!CheckChannels())
+            try
             {
-                Msg.Error(Resources.ErrorCheckChannels);
+                AssertChannels();
+            }
+            catch (Exception e)
+            {
+                Msg.Error(e.Message);
 
                 return false;
             }

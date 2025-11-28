@@ -12,7 +12,7 @@ namespace WeightTerminal
         [STAThread]
         static void Main()
         {
-            if (AppOneInstance.IsFirstInstance())
+            if (AppOneInstance.Default.IsFirstInstance)
             {
                 try
                 {
@@ -22,12 +22,12 @@ namespace WeightTerminal
                 }
                 finally
                 {
-                    AppOneInstance.Exit();
+                    AppOneInstance.Default.Release();
                 }
             }
             else
             {
-                AppOneInstance.ShowExistsInstance();
+                AppOneInstance.Default.ShowExistsInstance();
             }
         }
     }

@@ -34,7 +34,7 @@ namespace WeightTerminal
 
         protected override void WndProc(ref Message m)
         {
-            AppOneInstance.CheckAndShowApplication(m, this);
+            AppOneInstance.Default.CheckMessage(m, this);
 
             base.WndProc(ref m);
         }
