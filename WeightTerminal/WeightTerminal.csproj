@@ -77,10 +77,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="AppSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.ScaleTerminal.Designer.cs">
+    <Compile Include="Properties\Resources.P3tr0viCh.ScaleTerminal.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.ScaleTerminal.resx</DependentUpon>
+      <DependentUpon>Resources.P3tr0viCh.ScaleTerminal.resx</DependentUpon>
     </Compile>
     <Compile Include="Utils.cs" />
     <Compile Include="Utils.Log.cs" />
@@ -101,9 +101,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Properties\Resources.ScaleTerminal.resx">
+    <EmbeddedResource Include="Properties\Resources.P3tr0viCh.ScaleTerminal.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.ScaleTerminal.Designer.cs</LastGenOutput>
+      <LastGenOutput>Resources.P3tr0viCh.ScaleTerminal.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -1,5 +1,6 @@
 ﻿using P3tr0viCh.AppUpdate;
 using P3tr0viCh.Utils;
+using P3tr0viCh.Utils.Extensions;
 using System;
 using System.IO;
 using System.Net.Http;

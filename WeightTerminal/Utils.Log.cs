@@ -1,4 +1,5 @@
 ﻿using P3tr0viCh.Utils;
+using P3tr0viCh.Utils.Extensions;
 using System;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -21,7 +22,7 @@ namespace WeightTerminal
 
             public static void Info(string s, [CallerMemberName] string memberName = "")
             {
-                s = s.ReplaceEol();
+                s = s.SingleLine();
 
                 DebugWrite.Line(s, memberName);
 
@@ -39,7 +40,7 @@ namespace WeightTerminal
 
             public static void Error(string err, [CallerMemberName] string memberName = "")
             {
-                err = err.ReplaceEol();
+                err = err.SingleLine();
 
                 DebugWrite.Error(err, memberName);
 

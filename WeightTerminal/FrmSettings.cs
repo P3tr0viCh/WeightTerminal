@@ -20,17 +20,17 @@ namespace WeightTerminal
 
                 try
                 {
-                    AppSettings.Save();
+                    AppSettings.Default.Save();
 
                     if (frm.ShowDialog(owner) == DialogResult.OK)
                     {
-                        AppSettings.Save();
+                        AppSettings.Default.Save();
 
                         return true;
                     }
                     else
                     {
-                        AppSettings.Load();
+                        AppSettings.Default.Load();
 
                         return false;
                     }

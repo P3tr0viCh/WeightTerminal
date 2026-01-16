@@ -22,14 +22,14 @@ namespace WeightTerminal.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources_ScaleTerminal {
+    internal class Resources_P3tr0viCh_ScaleTerminal {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources_ScaleTerminal() {
+        internal Resources_P3tr0viCh_ScaleTerminal() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace WeightTerminal.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WeightTerminal.Properties.Resources.ScaleTerminal", typeof(Resources_ScaleTerminal).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WeightTerminal.Properties.Resources.P3tr0viCh.ScaleTerminal", typeof(Resources_P3tr0viCh_ScaleTerminal).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

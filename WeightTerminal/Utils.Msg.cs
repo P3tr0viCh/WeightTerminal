@@ -1,4 +1,4 @@
-﻿using P3tr0viCh.Utils;
+﻿using P3tr0viCh.Utils.Extensions;
 
 namespace WeightTerminal
 {
@@ -8,14 +8,14 @@ namespace WeightTerminal
         {
             public static void Info(string text = "Hello, world!")
             {
-                Log.Info(text.ReplaceEol(), "Msg.Info");
+                Log.Info(text.SingleLine(), "Msg.Info");
 
                 P3tr0viCh.Utils.Msg.Info(text);
             }
 
             public static bool Question(string text = "To be or not to be?")
             {
-                Log.Info(text.ReplaceEol(), "Msg.Question");
+                Log.Info(text.SingleLine(), "Msg.Question");
 
                 var result = P3tr0viCh.Utils.Msg.Question(text);
 
@@ -26,7 +26,7 @@ namespace WeightTerminal
 
             public static void Error(string text = "Error!")
             {
-                Log.Info(text.ReplaceEol(), "Msg.Error");
+                Log.Info(text.SingleLine(), "Msg.Error");
 
                 P3tr0viCh.Utils.Msg.Error(text);
             }

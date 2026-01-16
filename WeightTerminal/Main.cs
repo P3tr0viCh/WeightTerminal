@@ -5,9 +5,10 @@
 using P3tr0viCh.AppUpdate;
 using P3tr0viCh.ScaleTerminal;
 using P3tr0viCh.Utils;
+using P3tr0viCh.Utils.Extensions;
+using P3tr0viCh.Utils.Forms;
 using System;
 using System.IO.Ports;
-using System.Linq;
 using System.Windows.Forms;
 using WeightTerminal.Properties;
 using static P3tr0viCh.ScaleTerminal.ScaleTerminal;
@@ -266,14 +267,14 @@ namespace WeightTerminal
 
         public void AppSettingsLoad()
         {
-            if (AppSettings.Load()) return;
+            if (AppSettings.Default.Load()) return;
 
             Utils.Log.Error(AppSettings.LastError);
         }
 
         public void AppSettingsSave()
         {
-            if (AppSettings.Save()) return;
+            if (AppSettings.Default.Save()) return;
 
             Utils.Log.Error(AppSettings.LastError);
         }
@@ -391,7 +392,6 @@ namespace WeightTerminal
 
             if (FrmSettings.ShowDlg(this))
             {
-                AppSettings.Load();
                 SettingsChanged();
             }
 
