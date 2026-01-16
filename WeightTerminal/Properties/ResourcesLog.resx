@@ -117,7 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="openFileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
+  <data name="CheckSettingsTerminalNone" xml:space="preserve">
+    <value>check settings: terminaltype=none</value>
+  </data>
+  <data name="ComPortsCount" xml:space="preserve">
+    <value>com ports count: {0}</value>
+  </data>
+  <data name="ComPortsNotExists" xml:space="preserve">
+    <value>com port not found</value>
+  </data>
+  <data name="PathAppDirectory" xml:space="preserve">
+    <value>app directory</value>
+  </data>
+  <data name="PathDatabase" xml:space="preserve">
+    <value>database</value>
+  </data>
+  <data name="PathDataDirectory" xml:space="preserve">
+    <value>data directory</value>
+  </data>
+  <data name="PathDataDirectoryCreateOk" xml:space="preserve">
+    <value>created</value>
+  </data>
+  <data name="PathLogsDirectory" xml:space="preserve">
+    <value>logs directory</value>
+  </data>
+  <data name="PathSettings" xml:space="preserve">
+    <value>settings</value>
+  </data>
+  <data name="ScaleTerminalClosed" xml:space="preserve">
+    <value>{0} closed</value>
+  </data>
+  <data name="ScaleTerminalOpened" xml:space="preserve">
+    <value>{0} opened. type = {1}</value>
+  </data>
+  <data name="UpdateDone" xml:space="preserve">
+    <value>done</value>
+  </data>
+  <data name="UpdateStart" xml:space="preserve">
+    <value>start</value>
+  </data>
+  <data name="UpdateVersions" xml:space="preserve">
+    <value>current: {0}, latest: {1}</value>
+  </data>
 </root>

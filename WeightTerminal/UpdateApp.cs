@@ -31,7 +31,7 @@ namespace WeightTerminal
 
         public async void Update()
         {
-            Utils.Log.Info("start");
+            Utils.Log.Info(ResourcesLog.UpdateStart);
 
             try
             {
@@ -62,7 +62,8 @@ namespace WeightTerminal
 
                     await AppUpdate.CheckLatestVersionAsync();
 
-                    Utils.Log.Info($"current: {AppUpdate.Versions.Local}, latest: {AppUpdate.Versions.Latest}");
+                    Utils.Log.Info(string.Format(ResourcesLog.UpdateVersions, 
+                        AppUpdate.Versions.Local, AppUpdate.Versions.Latest));
 
                     if (AppUpdate.Versions.IsLatest())
                     {
@@ -107,7 +108,7 @@ namespace WeightTerminal
             }
             finally
             {
-                Utils.Log.Info("done");
+                Utils.Log.Info(ResourcesLog.UpdateDone);
             }
         }
     }

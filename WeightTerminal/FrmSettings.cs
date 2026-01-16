@@ -1,92 +1,40 @@
-﻿using P3tr0viCh.Utils;
+﻿using P3tr0viCh.Utils.Forms;
+using P3tr0viCh.Utils.Settings;
 using System;
-using System.Windows.Forms;
-using WeightTerminal.Properties;
 
 namespace WeightTerminal
 {
-    public partial class FrmSettings : Form
+    internal class FrmSettings : FrmSettingsBase
     {
-        public FrmSettings()
+        public FrmSettings(ISettingsBase settings) : base(settings)
         {
-            InitializeComponent();
         }
 
-        public static bool ShowDlg(IWin32Window owner)
+        protected override void BeforeOpen()
         {
-            using (var frm = new FrmSettings())
-            {
-                Utils.Log.WriteFormOpen(frm);
-
-                try
-                {
-                    AppSettings.Default.Save();
-
-                    if (frm.ShowDialog(owner) == DialogResult.OK)
-                    {
-                        AppSettings.Default.Save();
-
-                        return true;
-                    }
-                    else
-                    {
-                        AppSettings.Default.Load();
-
-                        return false;
-                    }
-                }
-                finally
-                {
-                    Utils.Log.WriteFormClose(frm);
-                }
-            }
+            Utils.Log.WriteFormOpen(this);
         }
 
-        private void FrmSettings_Load(object sender, EventArgs e)
+        protected override void AfterClose()
         {
-            propertyGrid.SelectedObject = AppSettings.Default;
+            Utils.Log.WriteFormClose(this);
         }
 
-        private void AssertChannels()
+        protected override void SaveFormState()
         {
-            if (AppSettings.Default.Channel1 == AppSettings.Default.Channel2 ||
-                AppSettings.Default.Channel1 == AppSettings.Default.Channel3 ||
-                AppSettings.Default.Channel1 == AppSettings.Default.Channel4 ||
-                AppSettings.Default.Channel2 == AppSettings.Default.Channel3 ||
-                AppSettings.Default.Channel2 == AppSettings.Default.Channel4 ||
-                AppSettings.Default.Channel3 == AppSettings.Default.Channel4)
-            {
-                throw new Exception(Resources.ErrorCheckChannels);
-            }
+            AppSettings.SaveFormState(this, AppSettings.Default.FormStates);
         }
 
-        private bool CheckData()
+        protected override void LoadFormState()
         {
-            try
-            {
-                AssertChannels();
-            }
-            catch (Exception e)
-            {
-                Msg.Error(e.Message);
-
-                return false;
-            }
-
-            return true;
+            AppSettings.LoadFormState(this, AppSettings.Default.FormStates);
         }
 
-        private bool ApplyData()
+        protected override void SettingsHasError(Exception e)
         {
-            return CheckData();
-        }
+            Utils.Log.Error(e);
 
-        private void BtnOk_Click(object sender, EventArgs e)
-        {
-            if (ApplyData())
-            {
-                DialogResult = DialogResult.OK;
-            }
+            Utils.Msg.Error(e.Message);
         }
     }
 }

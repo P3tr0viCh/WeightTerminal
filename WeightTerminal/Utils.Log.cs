@@ -12,6 +12,11 @@ namespace WeightTerminal
         {
             private class InternalLog : DefaultInstance<P3tr0viCh.Utils.Log> { }
 
+            public static string Directory
+            {
+                get => InternalLog.Default.Directory; set => InternalLog.Default.Directory = value;
+            }
+
             public static void WriteProgramStart() => InternalLog.Default.WriteProgramStart();
 
             public static void WriteProgramStop() => InternalLog.Default.WriteProgramStop();

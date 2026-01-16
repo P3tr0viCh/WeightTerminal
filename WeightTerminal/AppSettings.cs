@@ -52,5 +52,18 @@ namespace WeightTerminal
         [DisplayName("Канал 4")]
         [Description("Канал 4 в окне программы")]
         public Channel Channel4 { get; set; } = Channel.RightNear;
+
+        // --------------------------------------------------------------------------------------------------------
+        [Browsable(false)]
+        public FormStates FormStates { get; private set; } = new FormStates();
+
+        // --------------------------------------------------------------------------------------------------------
+        protected override void Check()
+        {
+            if (FormStates == null)
+            {
+                FormStates = new FormStates();
+            }
+        }
     }
 }

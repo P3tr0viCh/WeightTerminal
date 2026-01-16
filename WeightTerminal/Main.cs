@@ -8,6 +8,7 @@ using P3tr0viCh.Utils;
 using P3tr0viCh.Utils.Extensions;
 using P3tr0viCh.Utils.Forms;
 using System;
+using System.IO;
 using System.IO.Ports;
 using System.Windows.Forms;
 using WeightTerminal.Properties;
@@ -26,11 +27,7 @@ namespace WeightTerminal
         {
             InitializeComponent();
 
-            Utils.Log.WriteProgramStart();
-
-            AppSettings.Directory = Files.ExecutableDirectory();
-
-            DebugWrite.Line($"Settings: {AppSettings.FilePath}", "Main");
+            SetDirectories();
         }
 
         protected override void WndProc(ref Message m)
@@ -38,6 +35,49 @@ namespace WeightTerminal
             AppOneInstance.Default.CheckMessage(m, this);
 
             base.WndProc(ref m);
+        }
+
+        private bool CreateProgramDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                return false;
+            }
+
+            Directory.CreateDirectory(path);
+
+            return true;
+        }
+
+        private void SetDirectories()
+        {
+            var programDataDirectory =
+#if DEBUG
+                    Path.Combine(Files.ExecutableDirectory(), Files.ExecutableName());
+
+#else
+                Files.AppDataLocalDirectory();
+#endif
+            var programDirectoryCreated = CreateProgramDirectory(programDataDirectory);
+
+            AppSettings.Directory = programDataDirectory;
+
+            Utils.Log.Directory = programDataDirectory;
+
+            Utils.Log.WriteProgramStart();
+
+            Utils.Log.Info(Application.StartupPath, ResourcesLog.PathAppDirectory);
+
+            if (programDirectoryCreated)
+            {
+                Utils.Log.Info(ResourcesLog.PathDataDirectoryCreateOk, ResourcesLog.PathDataDirectory);
+            }
+
+            Utils.Log.Info(programDataDirectory, ResourcesLog.PathDataDirectory);
+
+            Utils.Log.Info(Utils.Log.Directory, ResourcesLog.PathLogsDirectory);
+
+            Utils.Log.Info(AppSettings.FilePath, ResourcesLog.PathSettings);
         }
 
         private void Main_Load(object sender, EventArgs e)
@@ -95,9 +135,6 @@ namespace WeightTerminal
             ScaleTerminal.HeadReceived -= ScaleTerminal_HeadReceived;
             ScaleTerminal.WeightReceived -= ScaleTerminal_WeightReceived;
 
-            ScaleTerminal.Opened -= ScaleTerminal_Opened;
-            ScaleTerminal.Closed -= ScaleTerminal_Closed;
-
             TerminalState = false;
 
             AppSettingsSave();
@@ -109,38 +146,39 @@ namespace WeightTerminal
 
         private void ScaleTerminalOpened()
         {
-            ibtnState.SetImages((int)BtnImage.StateOnNormal, (int)BtnImage.StateOnHover);
+            BeginInvoke((MethodInvoker)delegate
+            {
+                ibtnState.SetImages((int)BtnImage.StateOnNormal, (int)BtnImage.StateOnHover);
 
-            SetToolTip(btnState, Resources.ToolTipStateClosing, Key.State);
+                SetToolTip(btnState, Resources.ToolTipStateClosing, Key.State);
+            });
 
-            Utils.Log.Info($"{ScaleTerminal.PortName} opened. Type = {ScaleTerminal.Type}");
+            Utils.Log.Info(string.Format(ResourcesLog.ScaleTerminalOpened,
+                ScaleTerminal.PortName, ScaleTerminal.Type));
         }
 
         private void ScaleTerminal_Opened(object sender, EventArgs e)
         {
-            BeginInvoke((MethodInvoker)delegate
-            {
-                ScaleTerminalOpened();
-            });
+            ScaleTerminalOpened();
         }
 
         private void ScaleTerminalClosed()
         {
-            WeightClear();
+            BeginInvoke((MethodInvoker)delegate
+            {
+                WeightClear();
 
-            ibtnState.SetImages((int)BtnImage.StateOffNormal, (int)BtnImage.StateOffHover);
+                ibtnState.SetImages((int)BtnImage.StateOffNormal, (int)BtnImage.StateOffHover);
 
-            SetToolTip(btnState, Resources.ToolTipStateOpening, Key.State);
+                SetToolTip(btnState, Resources.ToolTipStateOpening, Key.State);
+            });
 
-            Utils.Log.Info($"{ScaleTerminal.PortName} closed");
+            Utils.Log.Info(string.Format(ResourcesLog.ScaleTerminalClosed, ScaleTerminal.PortName));
         }
 
         private void ScaleTerminal_Closed(object sender, EventArgs e)
         {
-            BeginInvoke((MethodInvoker)delegate
-            {
-                ScaleTerminalClosed();
-            });
+            ScaleTerminalClosed();
         }
 
 #if SHOW_RAWDATA
@@ -285,13 +323,13 @@ namespace WeightTerminal
 
             if (ports.Length != 0)
             {
-                Utils.Log.Info($"COM ports count: {ports.Length}");
+                Utils.Log.Info(string.Format(ResourcesLog.ComPortsCount, ports.Length));
 
                 return true;
             }
             else
             {
-                Utils.Log.Error("COM PORT not found");
+                Utils.Log.Error(ResourcesLog.ComPortsNotExists);
 
                 return false;
             }
@@ -368,7 +406,7 @@ namespace WeightTerminal
 
             if (AppSettings.Default.TerminalType == TerminalType.None)
             {
-                Utils.Log.Error("check settings: terminaltype=none");
+                Utils.Log.Error(ResourcesLog.CheckSettingsTerminalNone);
             }
 
             ScaleTerminal.SerialPort.PortName = AppSettings.Default.ComPortName;
@@ -390,7 +428,9 @@ namespace WeightTerminal
 
             TerminalState = false;
 
-            if (FrmSettings.ShowDlg(this))
+            var frmSettings = new FrmSettings(AppSettings.Default);
+
+            if (frmSettings.ShowDialog(this))
             {
                 SettingsChanged();
             }

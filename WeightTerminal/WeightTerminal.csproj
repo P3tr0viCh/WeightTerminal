@@ -64,14 +64,16 @@
     <Compile Include="FrmSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmSettings.Designer.cs">
-      <DependentUpon>FrmSettings.cs</DependentUpon>
-    </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\ResourcesLog.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourcesLog.resx</DependentUpon>
     </Compile>
     <Compile Include="UpdateApp.cs" />
     <Compile Include="Program.cs" />
@@ -85,9 +87,6 @@
     <Compile Include="Utils.cs" />
     <Compile Include="Utils.Log.cs" />
     <Compile Include="Utils.Msg.cs" />
-    <EmbeddedResource Include="FrmSettings.resx">
-      <DependentUpon>FrmSettings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
@@ -104,6 +103,10 @@
     <EmbeddedResource Include="Properties\Resources.P3tr0viCh.ScaleTerminal.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.P3tr0viCh.ScaleTerminal.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\ResourcesLog.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourcesLog.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
