@@ -8,6 +8,7 @@ using P3tr0viCh.Utils;
 using P3tr0viCh.Utils.Extensions;
 using P3tr0viCh.Utils.Forms;
 using System;
+using System.Drawing;
 using System.IO;
 using System.IO.Ports;
 using System.Windows.Forms;
@@ -98,6 +99,8 @@ namespace WeightTerminal
             lblDiffLeft.ForeColor = ControlPaint.Light(lblDiffLeft.ForeColor);
             lblDiffRight.ForeColor = ControlPaint.Light(lblDiffRight.ForeColor);
 
+            ScaleTerminal.ExceptionReceived += ScaleTerminal_ExceptionReceived;
+
             ScaleTerminal.HeadReceived += ScaleTerminal_HeadReceived;
             ScaleTerminal.WeightReceived += ScaleTerminal_WeightReceived;
 
@@ -135,6 +138,8 @@ namespace WeightTerminal
             ScaleTerminal.HeadReceived -= ScaleTerminal_HeadReceived;
             ScaleTerminal.WeightReceived -= ScaleTerminal_WeightReceived;
 
+            ScaleTerminal.ExceptionReceived -= ScaleTerminal_ExceptionReceived;
+
             TerminalState = false;
 
             AppSettingsSave();
@@ -166,6 +171,8 @@ namespace WeightTerminal
         {
             BeginInvoke((MethodInvoker)delegate
             {
+                HasError = false;
+
                 WeightClear();
 
                 ibtnState.SetImages((int)BtnImage.StateOffNormal, (int)BtnImage.StateOffHover);
@@ -218,6 +225,7 @@ namespace WeightTerminal
         }
 
         private int weight = 0;
+
         public int Weight
         {
             get => weight;
@@ -234,6 +242,31 @@ namespace WeightTerminal
         public string Status
         {
             set => lblStatus.Text = value;
+        }
+
+        private bool hasError = false;
+
+        private bool HasError
+        {
+            set
+            {
+                if (value == hasError) return;
+
+                hasError = value;
+
+                if (hasError)
+                {
+                    lblWeight.ForeColor = Misc.HexToColor("#D50000");
+
+                    Status = Resources.TextError;
+                }
+                else
+                {
+                    lblWeight.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
+
+                    Status = string.Empty;
+                }
+            }
         }
 
         private void ScaleTerminal_HeadReceived(object sender, HeadEventArgs e)
@@ -264,12 +297,21 @@ namespace WeightTerminal
             }
         }
 
+        private void CatchException(Exception e)
+        {
+            HasError = true;
+
+            Utils.Log.Error(e);
+        }
+
         private void DoWeightReceived(WeightEventArgs weightEvent)
         {
-            try
+            BeginInvoke((MethodInvoker)delegate
             {
-                BeginInvoke((MethodInvoker)delegate
+                try
                 {
+                    HasError = false;
+
                     Weight = weightEvent.Weight;
 
                     if (ChannelsVisible)
@@ -279,12 +321,12 @@ namespace WeightTerminal
                             SetChannel(ChannelFromTerminal(channel), weightEvent.Channels[channel]);
                         }
                     }
-                });
-            }
-            catch (Exception e)
-            {
-                DebugWrite.Error(e);
-            }
+                }
+                catch (Exception e)
+                {
+                    CatchException(e);
+                }
+            });
         }
 
         private void ScaleTerminal_WeightReceived(object sender, WeightEventArgs e)
@@ -301,6 +343,19 @@ namespace WeightTerminal
 #endif
 
             DoWeightReceived(e);
+        }
+
+        private void DoExceptionReceived(ExceptionEventArgs e)
+        {
+            BeginInvoke((MethodInvoker)delegate
+            {
+                CatchException(e.Exception);
+            });
+        }
+
+        private void ScaleTerminal_ExceptionReceived(object sender, ExceptionEventArgs e)
+        {
+            DoExceptionReceived(e);
         }
 
         public void AppSettingsLoad()
