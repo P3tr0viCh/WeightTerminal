@@ -126,6 +126,9 @@
   <data name="TerminalType.HbmWe2110.Description" xml:space="preserve">
     <value>HBM WE2110: HBM стандартный формат</value>
   </data>
+  <data name="TerminalType.HbmWe2110Alt.Description" xml:space="preserve">
+    <value>HBM WE2110: HBM стандартный формат (альтернативная конфигурация)</value>
+  </data>
   <data name="TerminalType.MicrosimM0601.Description" xml:space="preserve">
     <value>Микросим М0601</value>
   </data>

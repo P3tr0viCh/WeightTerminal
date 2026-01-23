@@ -198,7 +198,7 @@ namespace WeightTerminal
         {
             var bits = new System.Collections.BitArray(new byte[] { e.B });
 
-            DebugWrite.Line(string.Join("", bits.Cast<bool>().Reverse().Select(bit => bit ? '1' : '0')));
+            DebugWrite.Line(BitArrayExtensions.ToString(bits));
         }
 #endif
 
